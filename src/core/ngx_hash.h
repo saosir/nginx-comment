@@ -12,7 +12,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-
+// 构建好哈希表之后就不能插入与删除
 typedef struct {
     void             *value;
     u_short           len;

@@ -113,6 +113,19 @@ ngx_reset_pool(ngx_pool_t *pool)
 		// 不是只有链表头才需要偏移sizeof(ngx_pool_t)大小?
 		// 依小人拙见，下面一行代码改为
 		// p->d.last = (u_char *) p +  (p == pool ? sizeof(ngx_pool_t ) : sizeof(ngx_pool_data_t));
+		// 发送邮件给nginx得到回复
+
+		/*
+		A previous attempt to "fix" this can be found here, it looks
+		slightly better from my point of view:
+		
+		http://mailman.nginx.org/pipermail/nginx-devel/2010-June/000351.html
+		
+		Though we are quite happy with the current code, while it is not
+		optimal - it is simple and good enough from practical point of
+		view.
+
+		*/
         p->d.last = (u_char *) p + sizeof(ngx_pool_t);
     }
 }

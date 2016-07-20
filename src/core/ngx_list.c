@@ -42,7 +42,7 @@ ngx_list_push(ngx_list_t *l)
     ngx_list_part_t  *last;
 
     last = l->last;
-
+	// 该节点已经存满元素
     if (last->nelts == l->nalloc) {
 
         /* the last part is full, allocate a new list part */
@@ -52,14 +52,14 @@ ngx_list_push(ngx_list_t *l)
             return NULL;
         }
 
-        last->elts = ngx_palloc(l->pool, l->nalloc * l->size);
+        last->elts = ngx_palloc(l->pool, l->nalloc * l->size); // 存放元素的数组
         if (last->elts == NULL) {
             return NULL;
         }
 
         last->nelts = 0;
         last->next = NULL;
-
+		// 插入尾部
         l->last->next = last;
         l->last = last;
     }

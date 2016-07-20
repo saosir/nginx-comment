@@ -53,14 +53,16 @@ pool: 该list使用的分配内存的pool
 typedef struct {
     ngx_list_part_t  *last;
     ngx_list_part_t   part;
-    size_t            size;
+    size_t            size; // 元素大小
     ngx_uint_t        nalloc;
     ngx_pool_t       *pool;
 } ngx_list_t;
 
-
+// 链表每个节点都是一个数组，元素存放于数组当中
 ngx_list_t *ngx_list_create(ngx_pool_t *pool, ngx_uint_t n, size_t size);
 
+// n 链表节点数组大小
+// size 元素大小
 static ngx_inline ngx_int_t
 ngx_list_init(ngx_list_t *list, ngx_pool_t *pool, ngx_uint_t n, size_t size)
 {

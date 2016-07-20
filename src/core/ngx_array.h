@@ -15,9 +15,9 @@
 
 struct ngx_array_s {
     void        *elts; 		//元素首地址
-    ngx_uint_t   nelts;		//已经分配出去的元素个数
-    size_t       size;		//元素大小
-    ngx_uint_t   nalloc;	//数组的大小
+    ngx_uint_t   nelts;		//元素数量
+    size_t       size;		//每个元素大小
+    ngx_uint_t   nalloc;	//数组的容量
     ngx_pool_t  *pool;		//内存池
 };
 
@@ -27,7 +27,9 @@ void ngx_array_destroy(ngx_array_t *a);
 void *ngx_array_push(ngx_array_t *a);
 void *ngx_array_push_n(ngx_array_t *a, ngx_uint_t n);
 
-
+// 初始化数据变量如:
+// ngx_array_t a;
+// ngx_array_init(&a, p, 10, sizeof(int));
 static ngx_inline ngx_int_t
 ngx_array_init(ngx_array_t *array, ngx_pool_t *pool, ngx_uint_t n, size_t size)
 {

@@ -39,7 +39,9 @@ ngx_array_destroy(ngx_array_t *a)
     ngx_pool_t  *p;
 
     p = a->pool;
-
+	// 刚好是从内存池尾部申请的数据，直接
+	// 修改内存池指针，回收内存，否则忽略
+	// 之，直到摧毁内存再统一释放内存
     if ((u_char *) a->elts + a->size * a->nalloc == p->d.last) {
         p->d.last -= a->size * a->nalloc;
     }
@@ -57,6 +59,7 @@ ngx_array_push(ngx_array_t *a)
     size_t       size;
     ngx_pool_t  *p;
 
+	// 数组用完
     if (a->nelts == a->nalloc) {
 
         /* the array is full */
@@ -64,7 +67,7 @@ ngx_array_push(ngx_array_t *a)
         size = a->size * a->nalloc;
 
         p = a->pool;
-
+		// 如果数组元素在内存池页尾部
         if ((u_char *) a->elts + size == p->d.last
             && p->d.last + a->size <= p->d.end)
         {
@@ -78,7 +81,7 @@ ngx_array_push(ngx_array_t *a)
 
         } else {
             /* allocate a new array */
-
+			// 直接重新分配
             new = ngx_palloc(p, 2 * size);
             if (new == NULL) {
                 return NULL;
