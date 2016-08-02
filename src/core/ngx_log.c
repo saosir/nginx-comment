@@ -271,7 +271,7 @@ ngx_log_init(u_char *prefix)
     ngx_log.file = &ngx_log_file;
     ngx_log.log_level = NGX_LOG_NOTICE;
 
-    name = (u_char *) NGX_ERROR_LOG_PATH;
+    name = (u_char *) NGX_ERROR_LOG_PATH; // 默认
 
     /*
      * we use ngx_strlen() here since BCC warns about
@@ -279,14 +279,14 @@ ngx_log_init(u_char *prefix)
      */
 
     nlen = ngx_strlen(name);
-
+	// 没有设置路径的话输出到stderr
     if (nlen == 0) {
         ngx_log_file.fd = ngx_stderr;
         return &ngx_log;
     }
 
     p = NULL;
-
+	// 日志路径为绝对路径
 #if (NGX_WIN32)
     if (name[1] != ':') {
 #else

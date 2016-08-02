@@ -91,6 +91,7 @@ ngx_strlchr(u_char *p, u_char *last, u_char c)
 #if (NGX_MEMCPY_LIMIT)
 
 void *ngx_memcpy(void *dst, const void *src, size_t n);
+// !!!返回值和memcpy不同
 #define ngx_cpymem(dst, src, n)   (((u_char *) ngx_memcpy(dst, src, n)) + (n))
 
 #else

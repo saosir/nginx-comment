@@ -792,7 +792,9 @@ ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return rv;
 }
 
-
+//确保name是绝对路径，如果不是绝对路径
+//如果conf_prefix == 1，name=cycle->conf_prefix+name
+//否则name=cycle->prefix+name
 ngx_int_t
 ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix)
 {

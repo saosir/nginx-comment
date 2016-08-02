@@ -28,7 +28,7 @@ ngx_os_io_t ngx_os_io = {
     0
 };
 
-
+//  获取部分系统参数如内存页大小、cpu核心数
 ngx_int_t
 ngx_os_init(ngx_log_t *log)
 {

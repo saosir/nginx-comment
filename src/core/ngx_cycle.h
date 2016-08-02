@@ -46,7 +46,7 @@ struct ngx_cycle_s {
     ngx_uint_t                free_connection_n;
 
     ngx_queue_t               reusable_connections_queue;
-
+	//继承的socket
     ngx_array_t               listening;
     ngx_array_t               paths;
     ngx_list_t                open_files;
@@ -61,10 +61,13 @@ struct ngx_cycle_s {
 
     ngx_cycle_t              *old_cycle;
 
+	// 配置文件与目录
     ngx_str_t                 conf_file;
     ngx_str_t                 conf_param;
     ngx_str_t                 conf_prefix;
     ngx_str_t                 prefix;
+
+	//
     ngx_str_t                 lock_file;
     ngx_str_t                 hostname;
 };

@@ -211,7 +211,7 @@ main(int argc, char *const *argv)
     if (ngx_strerror_init() != NGX_OK) {
         return 1;
     }
-
+	// 解析命令配置
     if (ngx_get_options(argc, argv) != NGX_OK) {
         return 1;
     }
@@ -268,7 +268,7 @@ main(int argc, char *const *argv)
     }
 
     /* TODO */ ngx_max_sockets = -1;
-
+	// 时间初始化，调用ngx_time_update更新时间
     ngx_time_init();
 
 #if (NGX_PCRE)
@@ -276,7 +276,7 @@ main(int argc, char *const *argv)
 #endif
 
     ngx_pid = ngx_getpid();
-
+	// 日志
     log = ngx_log_init(ngx_prefix);
     if (log == NULL) {
         return 1;
@@ -294,21 +294,21 @@ main(int argc, char *const *argv)
 
     ngx_memzero(&init_cycle, sizeof(ngx_cycle_t));
     init_cycle.log = log;
-    ngx_cycle = &init_cycle;
-
+    ngx_cycle = &init_cycle; // 本地变量
+	// 内存池
     init_cycle.pool = ngx_create_pool(1024, log);
     if (init_cycle.pool == NULL) {
         return 1;
     }
-
+	// 保存全局命令行参数
     if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
         return 1;
     }
-
+	// 确保配置文件与工作目录的路径正确
     if (ngx_process_options(&init_cycle) != NGX_OK) {
         return 1;
     }
-
+	// 系统参数初始化
     if (ngx_os_init(log) != NGX_OK) {
         return 1;
     }
@@ -316,11 +316,12 @@ main(int argc, char *const *argv)
     /*
      * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
      */
-
+	//CRC 校验通过查表进行，效率高
     if (ngx_crc32_table_init() != NGX_OK) {
         return 1;
     }
-
+	//nginx服务器升级的情况下，保证web服务的平滑过渡，
+	//新的nginx能够继承旧nginx打开的socket
     if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
         return 1;
     }
@@ -415,14 +416,14 @@ main(int argc, char *const *argv)
     return 0;
 }
 
-
+//继承socket
 static ngx_int_t
 ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 {
     u_char           *p, *v, *inherited;
     ngx_int_t         s;
     ngx_listening_t  *ls;
-
+	// socket保存在NGINX_VAR，格式为socket1:socket2:socket3
     inherited = (u_char *) getenv(NGINX_VAR);
 
     if (inherited == NULL) {
@@ -827,17 +828,16 @@ ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv)
     return NGX_OK;
 }
 
-
+//设置conf_path conf_prefix
 static ngx_int_t
 ngx_process_options(ngx_cycle_t *cycle)
 {
     u_char  *p;
     size_t   len;
-
     if (ngx_prefix) {
         len = ngx_strlen(ngx_prefix);
         p = ngx_prefix;
-
+		// 确保prefix最后一个字符是'/'
         if (len && !ngx_path_separator(p[len - 1])) {
             p = ngx_pnalloc(cycle->pool, len + 1);
             if (p == NULL) {
@@ -887,7 +887,7 @@ ngx_process_options(ngx_cycle_t *cycle)
 
 #endif
     }
-
+	// 配置文件
     if (ngx_conf_file) {
         cycle->conf_file.len = ngx_strlen(ngx_conf_file);
         cycle->conf_file.data = ngx_conf_file;
@@ -895,16 +895,18 @@ ngx_process_options(ngx_cycle_t *cycle)
     } else {
         ngx_str_set(&cycle->conf_file, NGX_CONF_PATH);
     }
-
+	// 确保配置文件cycle->conf_file是绝对路径
     if (ngx_conf_full_name(cycle, &cycle->conf_file, 0) != NGX_OK) {
         return NGX_ERROR;
     }
-
+	// 将conf_file的目录作为conf_prefix
     for (p = cycle->conf_file.data + cycle->conf_file.len - 1;
          p > cycle->conf_file.data;
          p--)
     {
         if (ngx_path_separator(*p)) {
+			// 怎么用ngx_cycle来计算长度?虽然从开始分析下来
+			// p和ngx_cycle是指向相同变量
             cycle->conf_prefix.len = p - ngx_cycle->conf_file.data + 1;
             cycle->conf_prefix.data = ngx_cycle->conf_file.data;
             break;

@@ -85,7 +85,7 @@ ngx_create_listening(ngx_conf_t *cf, void *sockaddr, socklen_t socklen)
     return ls;
 }
 
-
+// 对继承而来的socket进行初始化
 ngx_int_t
 ngx_set_inherited_sockets(ngx_cycle_t *cycle)
 {
