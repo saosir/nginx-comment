@@ -20,7 +20,7 @@ struct ngx_queue_s {
     ngx_queue_t  *next;
 };
 
-
+// 通过一个空的头结点管理队列
 #define ngx_queue_init(q)                                                     \
     (q)->prev = q;                                                            \
     (q)->next = q
@@ -83,7 +83,9 @@ struct ngx_queue_s {
 
 #endif
 
-
+// 将对立从q元素开始分裂，q与后面的元素
+// 作为新队列放到n中，n为一个空队列，完成
+// 操作后q为n的第一个元素
 #define ngx_queue_split(h, q, n)                                              \
     (n)->prev = (h)->prev;                                                    \
     (n)->prev->next = n;                                                      \
@@ -92,14 +94,14 @@ struct ngx_queue_s {
     (h)->prev->next = h;                                                      \
     (q)->prev = n;
 
-
+// h n为两个queue，将n附加到h后面
 #define ngx_queue_add(h, n)                                                   \
     (h)->prev->next = (n)->next;                                              \
     (n)->next->prev = (h)->prev;                                              \
     (h)->prev = (n)->prev;                                                    \
     (h)->prev->next = h;
 
-
+// 通过q指针，可以得到实际结构体的指针
 #define ngx_queue_data(q, type, link)                                         \
     (type *) ((u_char *) q - offsetof(type, link))
 

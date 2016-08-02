@@ -13,7 +13,7 @@ ngx_buf_t *
 ngx_create_temp_buf(ngx_pool_t *pool, size_t size)
 {
     ngx_buf_t *b;
-
+	// start <= pos <= last <= end
     b = ngx_calloc_buf(pool);
     if (b == NULL) {
         return NULL;
@@ -44,6 +44,7 @@ ngx_create_temp_buf(ngx_pool_t *pool, size_t size)
 }
 
 
+// 从pool chain链表得到或者从内存池分配一个chain
 ngx_chain_t *
 ngx_alloc_chain_link(ngx_pool_t *pool)
 {
@@ -57,6 +58,7 @@ ngx_alloc_chain_link(ngx_pool_t *pool)
     }
 
     cl = ngx_palloc(pool, sizeof(ngx_chain_t));
+	// 下面的判断?
     if (cl == NULL) {
         return NULL;
     }
@@ -64,7 +66,8 @@ ngx_alloc_chain_link(ngx_pool_t *pool)
     return cl;
 }
 
-
+// 分配bufs大小的内存块，然后等分到ngx_buf，将
+// 所有的buf串联成链表ngx_chain_t返回
 ngx_chain_t *
 ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
 {
@@ -72,13 +75,14 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
     ngx_int_t     i;
     ngx_buf_t    *b;
     ngx_chain_t  *chain, *cl, **ll;
-
+	// 分配bufs->num * bufs->size大小的内存，然后将
+	// 这块内存等分给ngx_buf
     p = ngx_palloc(pool, bufs->num * bufs->size);
     if (p == NULL) {
         return NULL;
     }
 
-    ll = &chain;
+    ll = &chain; // 等分后的ngx_buf串联成链表
 
     for (i = 0; i < bufs->num; i++) {
 
@@ -104,14 +108,14 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
         b->temporary = 1;
 
         b->start = p;
-        p += bufs->size;
+        p += bufs->size; //每个ngx_buf大小都为bufs->size
         b->end = p;
 
         cl = ngx_alloc_chain_link(pool);
         if (cl == NULL) {
             return NULL;
         }
-
+		// 单向链表尾插法
         cl->buf = b;
         *ll = cl;
         ll = &cl->next;
@@ -122,7 +126,9 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
     return chain;
 }
 
-
+// 将in链表中的buf挂接到chain的尾部
+// 注意这里的chain是指针的指针，
+// 即使*chain==NULL也是没有关系的
 ngx_int_t
 ngx_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain, ngx_chain_t *in)
 {
@@ -151,7 +157,7 @@ ngx_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain, ngx_chain_t *in)
     return NGX_OK;
 }
 
-
+// 从free链表得到一个buf节点,否则从内存池申请
 ngx_chain_t *
 ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
 {
@@ -179,17 +185,18 @@ ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
     return cl;
 }
 
-
+// 将out合并到busy，释放busy中buf为0的节点，
+// 非tag节点归还到内存池，tag节点放到free链表
 void
 ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
     ngx_chain_t **out, ngx_buf_tag_t tag)
 {
     ngx_chain_t  *cl;
-
+	// busy = busy + out
     if (*busy == NULL) {
         *busy = *out;
 
-    } else {
+    } else {// 改为else if (*out) 会不会好一点
         for (cl = *busy; cl->next; cl = cl->next) { /* void */ }
 
         cl->next = *out;
@@ -199,20 +206,22 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
 
     while (*busy) {
         cl = *busy;
-
+		// 找到一个buf内存大小非0直接跳出，说明后面的
+		// 的buf都是非0
         if (ngx_buf_size(cl->buf) != 0) {
             break;
         }
-
+		// 释放非tag类型且内存为0的buf
         if (cl->buf->tag != tag) {
             *busy = cl->next;
             ngx_free_chain(p, cl);
             continue;
         }
-
+		// 重置位置，因为pos和last会一直往后偏移
         cl->buf->pos = cl->buf->start;
         cl->buf->last = cl->buf->start;
 
+		// 重置后的buf放到free链表
         *busy = cl->next;
         cl->next = *free;
         *free = cl;

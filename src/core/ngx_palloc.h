@@ -99,9 +99,11 @@ struct ngx_pool_s {
     size_t                max; 
 	// 当前使用的内存页
     ngx_pool_t           *current;
+	// 与ngx_buf相关
     ngx_chain_t          *chain;
 	//申请大于max的内存块统一放到large链表中
     ngx_pool_large_t     *large;
+	// 资源释放句柄
     ngx_pool_cleanup_t   *cleanup;
     ngx_log_t            *log;
 };
