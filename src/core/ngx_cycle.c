@@ -212,7 +212,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     ngx_strlow(cycle->hostname.data, (u_char *) hostname, cycle->hostname.len);
 
-	// 每个module调用create_conf
+	// 每个module调用create_conf，并将返回的结果保存到cycle->conf_ctx
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->type != NGX_CORE_MODULE) {
             continue;
@@ -277,7 +277,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                        cycle->conf_file.data);
     }
 
-	// 对每个module屌啊用init_conf
+	// 每个module调用init_conf
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->type != NGX_CORE_MODULE) {
             continue;
@@ -349,7 +349,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
     /* open the new files */
-
+	// 打开文件
     part = &cycle->open_files.part;
     file = part->elts;
 
@@ -402,7 +402,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     part = &cycle->shared_memory.part;
     shm_zone = part->elts;
-
+	// 用part、 shm_zone循环遍历链表cycle->shared_memory
     for (i = 0; /* void */ ; i++) {
 
         if (i >= part->nelts) {
@@ -422,10 +422,11 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
 
         shm_zone[i].shm.log = cycle->log;
-
+		// 用opart、oshm_zone循环遍历链表old_cycle->shared_memory
         opart = &old_cycle->shared_memory.part;
         oshm_zone = opart->elts;
-
+		// 在old_cycle->shared_memory 找到与shm_zone[i]同一块共享内存
+		// 如果找到将其移交给shm_zone[i]
         for (n = 0; /* void */ ; n++) {
 
             if (n >= opart->nelts) {
@@ -448,7 +449,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             {
                 continue;
             }
-
+			// shm_zone[i] == oshm_zone[n]
             if (shm_zone[i].shm.size == oshm_zone[n].shm.size) {
                 shm_zone[i].shm.addr = oshm_zone[n].shm.addr;
 
@@ -465,7 +466,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
             break;
         }
-
+		//如果没有找到那么就创建一块
         if (ngx_shm_alloc(&shm_zone[i].shm) != NGX_OK) {
             goto failed;
         }

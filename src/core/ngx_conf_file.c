@@ -889,7 +889,7 @@ ngx_conf_test_full_name(ngx_str_t *name)
 #endif
 }
 
-
+// 将name文件加入cycle->open_files中
 ngx_open_file_t *
 ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name)
 {
@@ -911,7 +911,7 @@ ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name)
 
         part = &cycle->open_files.part;
         file = part->elts;
-
+		// 确认name是不是已经在文件列表中
         for (i = 0; /* void */ ; i++) {
 
             if (i >= part->nelts) {

@@ -87,7 +87,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
         }
     }
     /**/
-
+	// 内存结构ngx_slab_pool_t/slots/pages
     pool->min_size = 1 << pool->min_shift;
 
     p = (u_char *) pool + sizeof(ngx_slab_pool_t);
@@ -105,7 +105,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     }
 
     p += n * sizeof(ngx_slab_page_t);
-
+	// 疑问，下面没搞明白
     pages = (ngx_uint_t) (size / (ngx_pagesize + sizeof(ngx_slab_page_t)));
 
     ngx_memzero(p, pages * sizeof(ngx_slab_page_t));

@@ -326,6 +326,7 @@ main(int argc, char *const *argv)
         return 1;
     }
 
+	// 统一分配下标
     ngx_max_module = 0;
     for (i = 0; ngx_modules[i]; i++) {
         ngx_modules[i]->index = ngx_max_module++;

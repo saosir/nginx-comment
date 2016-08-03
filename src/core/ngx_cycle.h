@@ -35,6 +35,7 @@ struct ngx_shm_zone_s {
 
 
 struct ngx_cycle_s {
+	// 保存每个module的conf
     void                  ****conf_ctx;
     ngx_pool_t               *pool;
 
@@ -48,7 +49,9 @@ struct ngx_cycle_s {
     ngx_queue_t               reusable_connections_queue;
 	//继承的socket
     ngx_array_t               listening;
+	// 会在ngx_create_paths 逐个创建目录
     ngx_array_t               paths;
+	// 已打开文件列表，在ngx_init_cycle中被初始化
     ngx_list_t                open_files;
     ngx_list_t                shared_memory;
 
@@ -61,7 +64,7 @@ struct ngx_cycle_s {
 
     ngx_cycle_t              *old_cycle;
 
-	// 配置文件与目录
+	// 配置文件与目录，可以成为工作目录
     ngx_str_t                 conf_file;
     ngx_str_t                 conf_param;
     ngx_str_t                 conf_prefix;

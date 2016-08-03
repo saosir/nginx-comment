@@ -110,6 +110,7 @@ struct ngx_open_file_s {
 
 struct ngx_module_s {
     ngx_uint_t            ctx_index;
+	// main函数中，在ngx_init_cycle调用之前会统一分配下标
     ngx_uint_t            index;
 
     ngx_uint_t            spare0;
@@ -147,7 +148,7 @@ struct ngx_module_s {
 
 typedef struct {
     ngx_str_t             name;
-    void               *(*create_conf)(ngx_cycle_t *cycle);
+    void               *(*create_conf)(ngx_cycle_t *cycle); // 返回值保存到cycle->conf_ctx
     char               *(*init_conf)(ngx_cycle_t *cycle, void *conf);
 } ngx_core_module_t;
 
