@@ -8,6 +8,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+// 2^ngx_pagesize_shift = ngx_pagesize
 
 ngx_uint_t  ngx_pagesize;
 ngx_uint_t  ngx_pagesize_shift;
