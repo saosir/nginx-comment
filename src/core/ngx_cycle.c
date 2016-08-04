@@ -402,6 +402,8 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     part = &cycle->shared_memory.part;
     shm_zone = part->elts;
+	// 将old_cycle->shared_memory 中与shm_zone[i]中相同的shm
+	// 移到shm_zone[i]当中
 	// 用part、 shm_zone循环遍历链表cycle->shared_memory
     for (i = 0; /* void */ ; i++) {
 
@@ -486,7 +488,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 
     /* handle the listening sockets */
-
+	// 将old_cycle的listen socket 移到 cycle
     if (old_cycle->listening.nelts) {
         ls = old_cycle->listening.elts;
         for (i = 0; i < old_cycle->listening.nelts; i++) {
@@ -571,11 +573,11 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #endif
         }
     }
-
+	// 建立 listen socket
     if (ngx_open_listening_sockets(cycle) != NGX_OK) {
         goto failed;
     }
-
+	// 初始化配置 listen socket
     if (!ngx_test_config) {
         ngx_configure_listening_sockets(cycle);
     }
@@ -592,7 +594,8 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
     pool->log = cycle->log;
-
+	
+	// 调用每个模块的init_module
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->init_module) {
             if (ngx_modules[i]->init_module(cycle) != NGX_OK) {
@@ -606,7 +609,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     /* close and delete stuff that lefts from an old cycle */
 
     /* free the unnecessary shared memory */
-
+	// 删除释放old_cycle->shared_memory中不必要的内存
     opart = &old_cycle->shared_memory.part;
     oshm_zone = opart->elts;
 
@@ -656,7 +659,8 @@ old_shm_zone_done:
 
 
     /* close the unnecessary listening sockets */
-
+	// 关闭old->listening中不必要的socket，因为一部分已经转交给
+	// cycle当中，因此关闭重复的监听socket
     ls = old_cycle->listening.elts;
     for (i = 0; i < old_cycle->listening.nelts; i++) {
 

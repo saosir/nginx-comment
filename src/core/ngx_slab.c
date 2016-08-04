@@ -97,6 +97,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
        //而此时,我们是使用ngx_slab_page_s结构体中的slab成员来表示块的使用情况的
 
         ngx_slab_exact_size = ngx_pagesize / (8 * sizeof(uintptr_t));
+		// ngx_slab_exact_size最高位数
         for (n = ngx_slab_exact_size; n >>= 1; ngx_slab_exact_shift++) {
             /* void */
         }
@@ -120,8 +121,8 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     }
 
     p += n * sizeof(ngx_slab_page_t);
-	// pages个ngx_pagesize + sizeof(ngx_slab_page_t)，内存前面为
-	// n*ngx_slab_page_t数组，后面为n*ngx_pagesize的内存页
+	// 每个page大小ngx_pagesize + sizeof(ngx_slab_page_t)，前面存储n*ngx_slab_page_t数组，
+	// 后面存储n*ngx_pagesize页内存
     pages = (ngx_uint_t) (size / (ngx_pagesize + sizeof(ngx_slab_page_t)));
     // 初始化前面的ngx_slab_page_t数组，最后这些数组都会
     // 挂接到slots
@@ -140,7 +141,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     pool->start = (u_char *)
                   ngx_align_ptr((uintptr_t) p + pages * sizeof(ngx_slab_page_t),
                                  ngx_pagesize);
-    // 最后一个内存页可能不足，需要做调整 
+	// 确认是否还要调整指针，因为最后一页的内存可能不够一页
     m = pages - (pool->end - pool->start) / ngx_pagesize;
     if (m > 0) {
         pages -= m;
