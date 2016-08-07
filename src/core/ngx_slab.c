@@ -63,9 +63,11 @@ static void ngx_slab_free_pages(ngx_slab_pool_t *pool, ngx_slab_page_t *page,
 static void ngx_slab_error(ngx_slab_pool_t *pool, ngx_uint_t level,
     char *text);
 
-
+// 2k
 static ngx_uint_t  ngx_slab_max_size;
+// 128byte
 static ngx_uint_t  ngx_slab_exact_size;
+// 32位为7
 static ngx_uint_t  ngx_slab_exact_shift;
 // ngx_slab和memcached的slab alloc机制基本一样
 
@@ -214,12 +216,13 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
 
     slots = (ngx_slab_page_t *) ((u_char *) pool + sizeof(ngx_slab_pool_t));
     page = slots[slot].next;
-    
+     // 是否有空闲的页内存    
     if (page->next != page) {
-        // 有空闲的slab
         if (shift < ngx_slab_exact_shift) {
             // 分配的内存小于128byte
-            // 一个32位的slab不够作为bitmap
+            // 一个32位的slab不够作为bitmap，128*32=4k
+            //因为shift<ngx_slab_exact_shift，
+            //bitmap必然消耗大于1个uintptr_t类型，也即map至少是2
             do {
                 // page - pool->pages为用于分配的slab在slab数组的位置
                 // 一个page的大小为1<<ngx_pagesize_shift，那么p就是
@@ -305,9 +308,9 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                             page->prev = NGX_SLAB_EXACT;
                         }
 
-                        p = (page - pool->pages) << ngx_pagesize_shift;
-                        p += i << shift;
-                        p += (uintptr_t) pool->start;
+                        p = (page - pool->pages) << ngx_pagesize_shift; // 第几页
+                        p += i << shift;    // 页内偏移
+                        p += (uintptr_t) pool->start;  // chunk地址
 
                         goto done;
                     }
@@ -318,14 +321,24 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
             } while (page);
 
         } else { /* shift > ngx_slab_exact_shift */
+            //移位数分别为8、9、10、11这些情况，不可能为12
+            //因为2^12==2k==ngx_slab_max_size
 
+            
+            //计算出一个页可以分成多少个chunk
+            // 加入chunk大小为256byte，page->slab & NGX_SLAB_SHIFT_MASK就是8
+            // 32位ngx_pagesize_shift为12就是2k，可以得到n为4，1<<n就是16
+            // 也就是说此时的内存页可以分配为16个chunk，大小都为256byte
             n = ngx_pagesize_shift - (page->slab & NGX_SLAB_SHIFT_MASK);
-            n = 1 << n;
+            n = 1 << n; 
+
+            // 得到表示这些块数都用完的bitmap，加入分配的chunk大小256byte
+            // 现在n就是16位
             n = ((uintptr_t) 1 << n) - 1;
-            mask = n << NGX_SLAB_MAP_SHIFT;
+            mask = n << NGX_SLAB_MAP_SHIFT; // 32位系统NGX_SLAB_MAP_SHIFT为16
 
             do {
-                if ((page->slab & NGX_SLAB_MAP_MASK) != mask) {
+                if ((page->slab & NGX_SLAB_MAP_MASK) != mask) { // 该页还有未分配的chunk
 
                     for (m = (uintptr_t) 1 << NGX_SLAB_MAP_SHIFT, i = 0;
                          m & mask;
@@ -338,6 +351,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                         page->slab |= m;
 
                         if ((page->slab & NGX_SLAB_MAP_MASK) == mask) {
+                            // 该内存页的chunk分配完
                             prev = (ngx_slab_page_t *)
                                             (page->prev & ~NGX_SLAB_PAGE_MASK);
                             prev->next = page->next;
@@ -346,7 +360,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                             page->next = NULL;
                             page->prev = NGX_SLAB_BIG;
                         }
-
+                        // 计算chunk的位置
                         p = (page - pool->pages) << ngx_pagesize_shift;
                         p += i << shift;
                         p += (uintptr_t) pool->start;
@@ -360,7 +374,8 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
             } while (page);
         }
     }
-
+    // 没有可用的内存页供slab分配，这里分配一块内存页
+    // 挂接到对应的slab并将chunk分配出去
     page = ngx_slab_alloc_pages(pool, 1);
 
     if (page) {

@@ -16,8 +16,17 @@
 typedef struct ngx_slab_page_s  ngx_slab_page_t;
 
 struct ngx_slab_page_s {
-    // slab指明分配的chunk大小为2^slab
-    uintptr_t         slab;
+    // 1.当分配的chunk<128字节，此字段没用，bitmap由内存页分配
+    // 2.当分配的chunk==128字节，slab为32位，刚好可以管理整个内存页的32个chunk
+    // 3.当分配的chunk>128字节，低8位用来表示分配的chunk大小的位移数，
+    // 位移数可以为8、9、10、11，高2字节用来当做bitmap，参考NGX_SLAB_SHIFT_MASK，
+    // 高2字节为16位，chunk>128说明chunk最小为256，因为chunk大小按2 幂增长，2k里面
+    // 可以换分为16个256字节的chunk，16bit可以满足表示chunk分配情况，前提是chunk大小
+    // 大于128byte，参考NGX_SLAB_MAP_MASK表示chunk大于128字节是以后，
+    // bitmap掩码
+    
+    //8位可以用来存储
+    uintptr_t         slab;                             
     ngx_slab_page_t  *next;
     // 在 32 位系统中都 是按 4 字节对齐 (4-byte aligned)，
     // 同时共享内存起始地址至少是 4 字节对齐的。
