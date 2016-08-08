@@ -22,7 +22,7 @@
 
 
 #if (NGX_HAVE_FIONBIO)
-
+// ÉèÖÃsocket·Ç×èÈû
 int
 ngx_nonblocking(ngx_socket_t s)
 {
@@ -33,7 +33,7 @@ ngx_nonblocking(ngx_socket_t s)
     return ioctl(s, FIONBIO, &nb);
 }
 
-
+// ÉèÖÃsocket×èÈû
 int
 ngx_blocking(ngx_socket_t s)
 {

@@ -685,7 +685,8 @@ ngx_slab_alloc_pages(ngx_slab_pool_t *pool, ngx_uint_t pages)
 
         if (page->slab >= pages) {	 //page->slab表示还有多少内存页可使用
 
-            if (page->slab > pages) {
+            if (page->slab > pages) { // 页内存足够使用
+                // 切割出pages块页内存出来
                 page[pages].slab = page->slab - pages;
                 page[pages].next = page->next;
                 page[pages].prev = page->prev;
@@ -707,7 +708,7 @@ ngx_slab_alloc_pages(ngx_slab_pool_t *pool, ngx_uint_t pages)
             if (--pages == 0) {
                 return page;
             }
-
+            // 余下的内存页标注为占用
             for (p = page + 1; pages; pages--) {
                 p->slab = NGX_SLAB_PAGE_BUSY;
                 p->next = NULL;
@@ -732,17 +733,17 @@ ngx_slab_free_pages(ngx_slab_pool_t *pool, ngx_slab_page_t *page,
     ngx_slab_page_t  *prev;
 
     page->slab = pages--;
-
+    // 将后面的pages-1块slab清零
     if (pages) {
         ngx_memzero(&page[1], pages * sizeof(ngx_slab_page_t));
     }
-
+    // 将page从原有的链表删除
     if (page->next) {
         prev = (ngx_slab_page_t *) (page->prev & ~NGX_SLAB_PAGE_MASK);
         prev->next = page->next;
         page->next->prev = page->prev;
     }
-
+    // 归还到free链表
     page->prev = (uintptr_t) &pool->free;
     page->next = pool->free.next;
 

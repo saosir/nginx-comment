@@ -111,6 +111,7 @@ struct ngx_open_file_s {
 struct ngx_module_s {
     ngx_uint_t            ctx_index;
 	// main函数中，在ngx_init_cycle调用之前会统一分配下标
+	// 表示在cycle->conf_ctx的下标ngx_get_conf(cycle->conf_ctx, ngx_core_module)
     ngx_uint_t            index;
 
     ngx_uint_t            spare0;

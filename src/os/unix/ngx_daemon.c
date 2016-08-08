@@ -8,7 +8,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-
+// 将程序变为守护进程
 ngx_int_t
 ngx_daemon(ngx_log_t *log)
 {

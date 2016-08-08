@@ -78,7 +78,7 @@ ngx_os_init(ngx_log_t *log)
     return NGX_OK;
 }
 
-// è¾“å‡ºnginxç‰ˆæœ¬ä¸æ„å»ºä¿¡æ¯
+// ´òÓ¡°æ±¾Óë¹¹½¨ĞÅÏ¢
 void
 ngx_os_status(ngx_log_t *log)
 {

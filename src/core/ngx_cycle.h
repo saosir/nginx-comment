@@ -81,7 +81,7 @@ typedef struct {
      ngx_flag_t               master;
 
      ngx_msec_t               timer_resolution;
-
+     // 工作进程的数目
      ngx_int_t                worker_processes;
      ngx_int_t                debug_points;
 
@@ -100,7 +100,7 @@ typedef struct {
 
      ngx_str_t                working_directory;
      ngx_str_t                lock_file;
-
+     // pid文件名
      ngx_str_t                pid;
      ngx_str_t                oldpid;
 

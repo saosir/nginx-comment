@@ -25,14 +25,17 @@ static void ngx_signal_handler(int signo);
 static void ngx_process_get_status(void);
 static void ngx_unlock_mutexes(ngx_pid_t pid);
 
-
+// ÃüÁî²ÎÊı
 int              ngx_argc;
 char           **ngx_argv;
 char           **ngx_os_argv;
-
+// ±¾½ø³ÌÔÚ½ø³Ì±íµÄÎ»ÖÃ
 ngx_int_t        ngx_process_slot;
+// ÓÃÓÚ¼àÌı¿É¶Ásocket
 ngx_socket_t     ngx_channel;
+// µ±Ç°½ø³ÌÊı
 ngx_int_t        ngx_last_process;
+// ½ø³Ì±í
 ngx_process_t    ngx_processes[NGX_MAX_PROCESSES];
 
 
@@ -89,18 +92,19 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 {
     u_long     on;
     ngx_pid_t  pid;
-    ngx_int_t  s;
+    ngx_int_t  s; // ¿ÕÏĞ½ø³Ì±íÎ»ÖÃ
 
     if (respawn >= 0) {
         s = respawn;
 
     } else {
+        // ÕÒµ½¿ÕÏĞµÄ½ø³Ì±í
         for (s = 0; s < ngx_last_process; s++) {
             if (ngx_processes[s].pid == -1) {
                 break;
             }
         }
-
+        // Ã»ÓĞ¿ÕÓà½ø³Ì±í
         if (s == NGX_MAX_PROCESSES) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "no more than %d processes can be spawned",
@@ -108,8 +112,9 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             return NGX_INVALID_PID;
         }
     }
-
-
+    
+    // ²»ÊÇ·ÖÀëµÄ×Ó½ø³Ì£¬Ö¸µÄ¾ÍÊÇworker½ø³Ì£¬cache½ø³ÌÊÇ·ÖÀë³öÈ¥µÄ½ø³Ì
+    //cache½ø³Ì²»µÈÍ¬ÓÚworker½ø³Ì£¬ÏµÍ³°ÑËü¿´³É¶îÍâµÄ¶ÀÁ¢½ø³Ì
     if (respawn != NGX_PROCESS_DETACHED) {
 
         /* Solaris 9 still has no AF_LOCAL */
@@ -126,6 +131,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
                        ngx_processes[s].channel[0],
                        ngx_processes[s].channel[1]);
 
+        // ÉèÖÃsocket·Ç×èÈû
         if (ngx_nonblocking(ngx_processes[s].channel[0]) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           ngx_nonblocking_n " failed while spawning \"%s\"",
@@ -142,6 +148,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             return NGX_INVALID_PID;
         }
 
+        // ÉèÖÃchannel[0]µÄĞÅºÅÇı¶¯Òì²½I/O ±êÖ¾
         on = 1;
         if (ioctl(ngx_processes[s].channel[0], FIOASYNC, &on) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
@@ -149,6 +156,11 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             ngx_close_channel(ngx_processes[s].channel, cycle->log);
             return NGX_INVALID_PID;
         }
+
+        // ÉèÖÃchannel[0]µÄÊôÖ÷£¬¿ØÖÆchannel[0]µÄSIGIOĞÅºÅÖ»·¢¸ø
+        // master½ø³Ì£¬ngx_pidÎªÈ«¾Ö±äÁ¿£¬Ö¸µÄÊÇmasterÖ÷½ø³Ì£¬
+        // ÒòÎªmasterÓëworker½ø³ÌÍ¨ĞÅÊ±Í¨¹ı½«Êı¾İ·¢ËÍµ½½ø
+        // ³ÌµÄchannel[0]ÉÏÍ¨ÖªµÄ£¬Òò´Ëchannel[0]µÄÊôÖ÷ÊÇmanster½ø³Ì
 
         if (fcntl(ngx_processes[s].channel[0], F_SETOWN, ngx_pid) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
@@ -182,7 +194,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 
     ngx_process_slot = s;
 
-
+    // fork´´½¨×Ó½ø³Ì
     pid = fork();
 
     switch (pid) {
@@ -195,6 +207,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 
     case 0:
         ngx_pid = ngx_getpid();
+        //×Ó½ø³Ì½øÈëngx_worker_process_cycle£¬¿ªÊ¼ÊÂ¼şÑ­»·´¦Àí
         proc(cycle, data);
         break;
 
@@ -203,7 +216,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
     }
 
     ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "start %s %P", name, pid);
-
+    // ×Ó½ø³Ìpid
     ngx_processes[s].pid = pid;
     ngx_processes[s].exited = 0;
 
@@ -248,7 +261,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
         ngx_processes[s].detached = 1;
         break;
     }
-
+    // È·ÈÏÊÇ·ñÒª¸üĞÂ½ø³Ì×ÜÊı£¬¿ÉÄÜ²»ÊÇĞÂ´´½¨µÄworker
+    // Èç¹ûÊÇÖØÆôµÄworker¸ÃÏî²»ĞèÒª¸üĞÂ
     if (s == ngx_last_process) {
         ngx_last_process++;
     }
@@ -279,7 +293,7 @@ ngx_execute_proc(ngx_cycle_t *cycle, void *data)
     exit(1);
 }
 
-// åˆå§‹åŒ–å¯¹ä¿¡å·å¤„ç†çš„å›è°ƒ
+// ³õÊ¼»¯²¢ÉèÖÃĞÅºÅ»Øµ÷
 ngx_int_t
 ngx_init_signals(ngx_log_t *log)
 {

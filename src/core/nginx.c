@@ -272,6 +272,7 @@ main(int argc, char *const *argv)
     ngx_time_init();
 
 #if (NGX_PCRE)
+    // pcre正则初始化
     ngx_regex_init();
 #endif
 
@@ -366,11 +367,12 @@ main(int argc, char *const *argv)
     }
 
 #if !(NGX_WIN32)
-
+    // 信号处理初始化
     if (ngx_init_signals(cycle->log) != NGX_OK) {
         return 1;
     }
 
+    // 守护进程方式启动
     if (!ngx_inherited && ccf->daemon) {
         if (ngx_daemon(cycle->log) != NGX_OK) {
             return 1;
@@ -384,7 +386,7 @@ main(int argc, char *const *argv)
     }
 
 #endif
-
+    // pid文件
     if (ngx_create_pidfile(&ccf->pid, cycle->log) != NGX_OK) {
         return 1;
     }
@@ -406,7 +408,7 @@ main(int argc, char *const *argv)
     }
 
     ngx_use_stderr = 0;
-
+    // 开始事件循环
     if (ngx_process == NGX_PROCESS_SINGLE) {
         ngx_single_process_cycle(cycle);
 

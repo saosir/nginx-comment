@@ -33,6 +33,7 @@ static void ngx_cache_loader_process_handler(ngx_event_t *ev);
 
 
 ngx_uint_t    ngx_process;
+// ½ø³Ìpid
 ngx_pid_t     ngx_pid;
 ngx_uint_t    ngx_threaded;
 
@@ -58,6 +59,7 @@ ngx_uint_t    ngx_restart;
 
 #if (NGX_THREADS)
 volatile ngx_thread_t  ngx_threads[NGX_MAX_THREADS];
+// ×Ó½ø³Ì´´½¨µÄÊ±ºòngx_worker_process_cycleÖÐ¸ù¾Ý´Ë±äÁ¿´´½¨Ïß³Ì
 ngx_int_t              ngx_threads_n;
 #endif
 
@@ -94,17 +96,27 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     ngx_msec_t         delay;
     ngx_listening_t   *ls;
     ngx_core_conf_t   *ccf;
-
+    // ÉèÖÃÐÅºÅ´¦Àíº¯Êý
     sigemptyset(&set);
+    //×Ó½ø³ÌÍË³öÊ±·¢ËÍ¸ø¸¸½ø³ÌµÄ
     sigaddset(&set, SIGCHLD);
+    //¼ÆÊ±Æ÷ÐÅºÅ
     sigaddset(&set, SIGALRM);
+    //ÃèÊö·ûÉÏ¿ÉÒÔ½øÐÐI/OÊ±·¢³öµÄÐÅºÅ
     sigaddset(&set, SIGIO);
+    //ÖÐ¶ÏÐÅºÅ
     sigaddset(&set, SIGINT);
+    //ÖÕ¶ËÏßÂ·¹Ò¶ÏSIGHUP
     sigaddset(&set, ngx_signal_value(NGX_RECONFIGURE_SIGNAL));
+    //ÓÃ»§×Ô¶¨Òåusr1ÐÅºÅSIGUSR1
     sigaddset(&set, ngx_signal_value(NGX_REOPEN_SIGNAL));
+    //¿ØÖÆÖÐ¶Ï´óÐ¡¸Ä±äSIGWINCH
     sigaddset(&set, ngx_signal_value(NGX_NOACCEPT_SIGNAL));
+    //ÇëÇóÖÕÖ¹ÖÕ¶ËSIGTERM
     sigaddset(&set, ngx_signal_value(NGX_TERMINATE_SIGNAL));
+    //ÖÕ¶Ë·¢ËÍµÄquitÐÅºÅSIGQUIT
     sigaddset(&set, ngx_signal_value(NGX_SHUTDOWN_SIGNAL));
+    //ÓÃ»§×Ô¶¨Òåusr2ÐÅºÅSIGUSR2
     sigaddset(&set, ngx_signal_value(NGX_CHANGEBIN_SIGNAL));
 
     if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {
@@ -114,7 +126,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
     sigemptyset(&set);
 
-	// å‘½ä»¤è¡Œç»„è£…
+    // ÉèÖÃ½ø³Ì±êÌâ
     size = sizeof(master_process);
 
     for (i = 0; i < ngx_argc; i++) {
@@ -133,18 +145,25 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
 
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
-
+    // Æô¶¯worker½ø³Ì
     ngx_start_worker_processes(cycle, ccf->worker_processes,
                                NGX_PROCESS_RESPAWN);
+    // Æô¶¯cache½ø³Ì
+    // ÓÐÐ©Ä£¿éÐèÒªÎÄ¼þcache£¬±ÈÈçfastcgiÄ£¿é£¬ÕâÐ©Ä£¿é»á
+    // °ÑÎÄ¼þcacheÂ·¾¶Ìí¼Óµ½cycle->pathsÖÐ£¬ÎÄ¼þcache¹ÜÀí½ø³Ì
+    // »á¶¨ÆÚµ÷ÓÃÕâÐ©Ä£¿éµÄÎÄ¼þcache´¦Àí¹³×Ó´¦ÀíÒ»ÏÂ
+    // ÎÄ¼þcache,ÆäÊµÒ»¹²»áÆô¶¯Á½¸ö½ø³Ì£¬ÕâÐ©½ø³ÌµÄ
+    // detached»á±»ÉèÖÃÎª1
     ngx_start_cache_manager_processes(cycle, 0);
 
     ngx_new_binary = 0;
     delay = 0;
     sigio = 0;
     live = 1;
-
+    // ½øÈëÊÂ¼þÑ­»·
     for ( ;; ) {
         if (delay) {
+            //³¬Ê±ÐÅºÅ£¬Ö¸ÊýÔö³¤Ë¯ÃßÊ±¼ä
             if (ngx_sigalrm) {
                 sigio = 0;
                 delay *= 2;
@@ -166,9 +185,9 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         }
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "sigsuspend");
-
+        // Ë¯Ãß
         sigsuspend(&set);
-
+        // ¸üÐÂÊ±¼ä
         ngx_time_update();
 
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
@@ -364,7 +383,7 @@ ngx_start_worker_processes(ngx_cycle_t *cycle, ngx_int_t n, ngx_int_t type)
 
         ngx_spawn_process(cycle, ngx_worker_process_cycle, NULL,
                           "worker process", type);
-
+        // ÏòÆäËûworker½ø³Ì¹ã²¥Í¨Öª´´½¨ÐÂ½ø³ÌÏûÏ¢
         ch.pid = ngx_processes[ngx_process_slot].pid;
         ch.slot = ngx_process_slot;
         ch.fd = ngx_processes[ngx_process_slot].channel[0];
@@ -429,7 +448,7 @@ ngx_start_cache_manager_processes(ngx_cycle_t *cycle, ngx_uint_t respawn)
     ngx_pass_open_channel(cycle, &ch);
 }
 
-
+// ¹ã²¥ÏûÏ¢¸øËùÓÐ½ø³Ì
 static void
 ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
 {
@@ -437,6 +456,7 @@ ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
 
     for (i = 0; i < ngx_last_process; i++) {
 
+        // Ìø¹ý×Ô¼º»òÕßÒì³£ÎÄ¼þÃèÊö·û
         if (i == ngx_process_slot
             || ngx_processes[i].pid == -1
             || ngx_processes[i].channel[0] == -1)
@@ -451,7 +471,7 @@ ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
                       ngx_processes[i].channel[0]);
 
         /* TODO: NGX_AGAIN */
-
+        // ·¢ËÍÊý¾Ý¸øÆäËûworker½ø³Ì
         ngx_write_channel(ngx_processes[i].channel[0],
                           ch, sizeof(ngx_channel_t), cycle->log);
     }
@@ -722,7 +742,7 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
     exit(0);
 }
 
-
+// fork×Ó½ø³Ì´´½¨µÄÊ±ºò£¬Ö´ÐÐ´Ëº¯Êý
 static void
 ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {
@@ -732,7 +752,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_process = NGX_PROCESS_WORKER;
 
     ngx_worker_process_init(cycle, 1);
-
+    // ×Ó½ø³Ì±êÌâ
     ngx_setproctitle("worker process");
 
 #if (NGX_THREADS)
@@ -750,7 +770,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             /* fatal */
             exit(2);
         }
-
+        // Ïß³Ì±¾µØ´æ´¢
         err = ngx_thread_key_create(&ngx_core_tls_key);
         if (err != 0) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
@@ -780,7 +800,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     }
     }
 #endif
-
+    // workerÏß³Ì½øÈëÊÂ¼þÑ­»·
     for ( ;; ) {
 
         if (ngx_exiting) {
@@ -956,7 +976,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_uint_t priority)
     for (i = 0; i < cycle->listening.nelts; i++) {
         ls[i].previous = NULL;
     }
-
+    // ³õÊ¼»¯Ã¿¸ömodule
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->init_process) {
             if (ngx_modules[i]->init_process(cycle) == NGX_ERROR) {
@@ -965,7 +985,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_uint_t priority)
             }
         }
     }
-
+    // ×Ó½ø³ÌÍ¨¹ýfork¶øÀ´£¬Òò´ËÐèÒª¹Ø±Õ²»±ØÒªµÄ×ÊÔ´
     for (n = 0; n < ngx_last_process; n++) {
 
         if (ngx_processes[n].pid == -1) {
@@ -1202,7 +1222,7 @@ ngx_wakeup_worker_threads(ngx_cycle_t *cycle)
     }
 }
 
-
+// fork×Ó½ø³ÌÖ®ºó£¬»á´´½¨¶à¸öÏß³Ì£¬ÏÂÃæÊÇÏß³ÌµÄº¯Êý¹ý³Ì
 static ngx_thread_value_t
 ngx_worker_thread_cycle(void *data)
 {
