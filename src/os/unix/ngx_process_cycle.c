@@ -114,7 +114,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
     sigemptyset(&set);
 
-
+	// 命令行组装
     size = sizeof(master_process);
 
     for (i = 0; i < ngx_argc; i++) {
@@ -128,7 +128,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         *p++ = ' ';
         p = ngx_cpystrn(p, (u_char *) ngx_argv[i], size);
     }
-
+	
     ngx_setproctitle(title);
 
 

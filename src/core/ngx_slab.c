@@ -118,7 +118,7 @@ ngx_slab_init(ngx_slab_pool_t *pool)
 
     for (i = 0; i < n; i++) {
         slots[i].slab = 0;
-        slots[i].next = &slots[i];
+        slots[i].next = &slots[i];	// 指向自己，空链表
         slots[i].prev = 0;
     }
 
@@ -683,7 +683,7 @@ ngx_slab_alloc_pages(ngx_slab_pool_t *pool, ngx_uint_t pages)
 
     for (page = pool->free.next; page != &pool->free; page = page->next) {
 
-        if (page->slab >= pages) {
+        if (page->slab >= pages) {	 //page->slab表示还有多少内存页可使用
 
             if (page->slab > pages) {
                 page[pages].slab = page->slab - pages;

@@ -331,7 +331,7 @@ main(int argc, char *const *argv)
     for (i = 0; ngx_modules[i]; i++) {
         ngx_modules[i]->index = ngx_max_module++;
     }
-
+	// 配置文件、环境变量，slab等初始化
     cycle = ngx_init_cycle(&init_cycle);
     if (cycle == NULL) {
         if (ngx_test_config) {

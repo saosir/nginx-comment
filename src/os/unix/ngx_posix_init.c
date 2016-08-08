@@ -28,7 +28,7 @@ ngx_os_io_t ngx_os_io = {
     0
 };
 
-//  ��ȡ����ϵͳ�������ڴ�ҳ��С��cpu������
+//  获取部分系统参数如内存页大小、cpu核心数
 ngx_int_t
 ngx_os_init(ngx_log_t *log)
 {
@@ -78,7 +78,7 @@ ngx_os_init(ngx_log_t *log)
     return NGX_OK;
 }
 
-
+// 输出nginx版本与构建信息
 void
 ngx_os_status(ngx_log_t *log)
 {

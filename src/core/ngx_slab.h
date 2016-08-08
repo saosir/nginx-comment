@@ -25,7 +25,6 @@ struct ngx_slab_page_s {
     // 大于128byte，参考NGX_SLAB_MAP_MASK表示chunk大于128字节是以后，
     // bitmap掩码
     
-    //8位可以用来存储
     uintptr_t         slab;                             
     ngx_slab_page_t  *next;
     // 在 32 位系统中都 是按 4 字节对齐 (4-byte aligned)，

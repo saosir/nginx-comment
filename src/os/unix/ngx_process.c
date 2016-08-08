@@ -279,7 +279,7 @@ ngx_execute_proc(ngx_cycle_t *cycle, void *data)
     exit(1);
 }
 
-
+// 初始化对信号处理的回调
 ngx_int_t
 ngx_init_signals(ngx_log_t *log)
 {

@@ -695,7 +695,7 @@ old_shm_zone_done:
 
 
     /* close the unnecessary open files */
-
+	// 关闭old_cycle中已打开的文件
     part = &old_cycle->open_files.part;
     file = part->elts;
 
