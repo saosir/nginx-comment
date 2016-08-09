@@ -44,6 +44,7 @@ struct ngx_cycle_s {
 
     ngx_connection_t        **files;
     ngx_connection_t         *free_connections;
+    // 剩余的空闲连接
     ngx_uint_t                free_connection_n;
 
     ngx_queue_t               reusable_connections_queue;
@@ -54,7 +55,7 @@ struct ngx_cycle_s {
 	// 已打开文件列表，在ngx_init_cycle中被初始化
     ngx_list_t                open_files;
     ngx_list_t                shared_memory;
-
+    // 可连接的总数    
     ngx_uint_t                connection_n;
     ngx_uint_t                files_n;
 

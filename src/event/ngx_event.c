@@ -279,7 +279,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     if (ngx_posted_accept_events) {
         ngx_event_process_posted(cycle, &ngx_posted_accept_events);
     }
-    //释放锁后再处理下面的EPOLLIN EPOLLOUT请求  
+    //释放锁后再处理下面的EPOLLIN、 EPOLLOUT请求  
     if (ngx_accept_mutex_held) {
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }

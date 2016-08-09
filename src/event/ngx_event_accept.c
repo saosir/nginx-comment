@@ -137,7 +137,8 @@ ngx_event_accept(ngx_event_t *ev)
 #if (NGX_STAT_STUB)
         (void) ngx_atomic_fetch_add(ngx_stat_accepted, 1);
 #endif
-
+        // ngx_cycle->free_connection_n 可用连接数小于7/8，ngx_accept_disabled
+        // 为正数，不去争抢accept锁
         ngx_accept_disabled = ngx_cycle->connection_n / 8
                               - ngx_cycle->free_connection_n;
 
