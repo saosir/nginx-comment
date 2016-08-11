@@ -390,7 +390,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
 
         return NGX_OK;
     }
-
+    // 抢accept锁失败
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "accept mutex lock failed: %ui", ngx_accept_mutex_held);
 
@@ -405,7 +405,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+// 将监听socket放到事件循环中
 static ngx_int_t
 ngx_enable_accept_events(ngx_cycle_t *cycle)
 {
@@ -438,7 +438,7 @@ ngx_enable_accept_events(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+// 监听socket从事件循环中删除
 static ngx_int_t
 ngx_disable_accept_events(ngx_cycle_t *cycle)
 {

@@ -9,15 +9,18 @@
 #include <ngx_core.h>
 #include <ngx_event.h>
 
+// 判断有无事件处理，只要判断下面的两个指针是否为NULL
 
+// socket accept事件
 ngx_thread_volatile ngx_event_t  *ngx_posted_accept_events;
+//socket 读/写 (非多线程情况还会存储计时器事件)
 ngx_thread_volatile ngx_event_t  *ngx_posted_events;
 
 #if (NGX_THREADS)
 ngx_mutex_t                      *ngx_posted_events_mutex;
 #endif
 
-
+// 遍历posted_event一次性处理所有事件回调
 void
 ngx_event_process_posted(ngx_cycle_t *cycle,
     ngx_thread_volatile ngx_event_t **posted)
@@ -35,7 +38,7 @@ ngx_event_process_posted(ngx_cycle_t *cycle,
             return;
         }
 
-        ngx_delete_posted_event(ev);
+        ngx_delete_posted_event(ev); // *posted的值会被改变
 
         ev->handler(ev);
     }

@@ -121,6 +121,8 @@ struct ngx_module_s {
 
     ngx_uint_t            version;
 
+    // 不同模块会有不同context，
+    // 如ngx_epoll_module的ctx为ngx_event_module_t ngx_epoll_module_ctx
     void                 *ctx;
     ngx_command_t        *commands;
     ngx_uint_t            type;

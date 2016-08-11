@@ -36,7 +36,7 @@ typedef struct {
 
 
 struct ngx_event_s {
-    void            *data;
+    void            *data; // ngx_connection_t
 
     unsigned         write:1;
 
@@ -130,7 +130,7 @@ struct ngx_event_s {
     ngx_uint_t       index;
 
     ngx_log_t       *log;
-
+    // 红黑树作为计时器，libevent使用的是二叉堆 
     ngx_rbtree_node_t   timer;
 
     unsigned         closed:1;
@@ -165,6 +165,7 @@ struct ngx_event_s {
 
     /* the links of the posted queue */
     ngx_event_t     *next;
+    // 指针的指针
     ngx_event_t    **prev;
 
 
@@ -481,7 +482,7 @@ typedef struct {
 #endif
 } ngx_event_conf_t;
 
-
+// 前3个字段与ngx_core_module_t一样
 typedef struct {
     ngx_str_t              *name;
 

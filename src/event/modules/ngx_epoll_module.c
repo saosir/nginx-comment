@@ -323,7 +323,7 @@ ngx_epoll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
             return NGX_ERROR;
         }
     }
-
+    // 最大监听数目    
     nevents = epcf->events;
 
     ngx_io = ngx_os_io;
@@ -386,17 +386,19 @@ ngx_epoll_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     int                  op;
     uint32_t             events, prev;
     ngx_event_t         *e;
-    ngx_connection_t    *c;
+    ngx_connection_t    *c; // 对立事件
     struct epoll_event   ee;
 
     c = ev->data;
 
     events = (uint32_t) event;
-
+    // 添加读事件，如果写事件处于active，那么最后
+    // epoll_ctl之后fd会mod 为EPOLLIN|EPOLLOUT，如果写事件不处于
+    // active，那么就add EPOLLIN
     if (event == NGX_READ_EVENT) {
         e = c->write;
         prev = EPOLLOUT;
-#if (NGX_READ_EVENT != EPOLLIN)
+#if (NGX_READ_EVENT != EPOLLIN) // 忽略此宏
         events = EPOLLIN;
 #endif
 
@@ -573,11 +575,12 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "epoll timer: %M", timer);
-
+    // epoll等待事件
     events = epoll_wait(ep, event_list, (int) nevents, timer);
 
     err = (events == -1) ? ngx_errno : 0;
 
+    // 更新时间
     if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm) {
         ngx_time_update();
     }
@@ -604,7 +607,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         if (timer != NGX_TIMER_INFINITE) {
             return NGX_OK;
         }
-
+        // 在timer为-1在没有事件的情况下epoll_wait返回
         ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                       "epoll_wait() returned no events without timeout");
         return NGX_ERROR;
@@ -672,7 +675,8 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             } else {
                 rev->ready = 1;
             }
-
+            // 有NGX_POST_EVENTS标志的话，监听socket和读/写分开处理
+            // 优先处理监听socket
             if (flags & NGX_POST_EVENTS) {
                 queue = (ngx_event_t **) (rev->accept ?
                                &ngx_posted_accept_events : &ngx_posted_events);
@@ -680,6 +684,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
                 ngx_locked_post_event(rev, queue);
 
             } else {
+                // 否则这里直接就回调事件处理
                 rev->handler(rev);
             }
         }
@@ -829,7 +834,7 @@ static char *
 ngx_epoll_init_conf(ngx_cycle_t *cycle, void *conf)
 {
     ngx_epoll_conf_t *epcf = conf;
-
+    // 监听512个socket
     ngx_conf_init_uint_value(epcf->events, 512);
     ngx_conf_init_uint_value(epcf->aio_requests, 32);
 

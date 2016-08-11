@@ -277,6 +277,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
                    "timer delta: %M", delta);
     //如果ngx_posted_accept_events链表有数据，就开始accept建立新连接
     if (ngx_posted_accept_events) {
+        //ngx_posted_accept_events指针的值会被更新
         ngx_event_process_posted(cycle, &ngx_posted_accept_events);
     }
     //释放锁后再处理下面的EPOLLIN、 EPOLLOUT请求  
@@ -284,6 +285,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }
 
+    // delta不为0说明时间有走动，检查时候有计时器超时
     if (delta) {
         ngx_event_expire_timers();
     }

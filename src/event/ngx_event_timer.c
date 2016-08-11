@@ -119,7 +119,7 @@ ngx_event_expire_timers(void)
             ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                            "event timer del: %d: %M",
                            ngx_event_ident(ev->data), ev->timer.key);
-
+            // 从计时队列中删除
             ngx_rbtree_delete(&ngx_event_timer_rbtree, &ev->timer);
 
             ngx_mutex_unlock(ngx_event_timer_mutex);
@@ -133,10 +133,11 @@ ngx_event_expire_timers(void)
             ev->timer_set = 0;
 
 #if (NGX_THREADS)
+            // 使用多线程会稍后处理，否则立即调用ev->handler(ev);
             if (ngx_threaded) {
                 ev->posted_timedout = 1;
 
-                ngx_post_event(ev, &ngx_posted_events);
+                ngx_post_event(ev, &ngx_posted_events);// 实现中ngx_posted_events会指向ev
 
                 ngx_unlock(ev->lock);
 
@@ -145,7 +146,7 @@ ngx_event_expire_timers(void)
 #endif
 
             ev->timedout = 1;
-
+            //非多线程情况
             ev->handler(ev);
 
             continue;
