@@ -12,23 +12,23 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-// �����ù�ϣ��֮��Ͳ��ܲ�����ɾ�������������õĲ��ǿ�����
-// ��ϣ����Ԫ�ش洢���������ڴ������У����ڴ滮�ָ�ÿ��Ͱ��
-// ��
-// �ڴ�ṹ�ο�http://blog.csdn.net/chen19870707/article/details/40794285
+// 构建好哈希表之后就不能插入与删除，该链表采用的不是开链法
+// 哈希表的元素存储在连续的内存数组中，将内存划分给每个桶管
+// 理
+// 内存结构参考http://blog.csdn.net/chen19870707/article/details/40794285
 
 
-// �����ϣ����Ԫ��
+// 插入哈希表的元素
 typedef struct {
     void             *value;
-    u_short           len; // name����
+    u_short           len; // name长度
     u_char            name[1];
 } ngx_hash_elt_t;
 
 
 typedef struct {
-    ngx_hash_elt_t  **buckets; // Ͱ����
-    ngx_uint_t        size; // Ͱ����
+    ngx_hash_elt_t  **buckets; // 桶数组
+    ngx_uint_t        size; // 桶数量
 } ngx_hash_t;
 
 
@@ -37,10 +37,10 @@ typedef struct {
     void             *value;
 } ngx_hash_wildcard_t;
 
-// ��ϣ��Ԫ�ؼ�/ֵ�ԣ���ʼ����ʱ��ʹ��
+// 哈希表元素键/值对，初始化的时候使用
 typedef struct {
     ngx_str_t         key;
-    ngx_uint_t        key_hash; // ͨ��key����õĹ�ϣֵ��ͨ������ķ�ʽ֪��������ĸ�Ͱ���й�
+    ngx_uint_t        key_hash; // 通过key计算好的哈希值，通过求余的方式知道存放在哪个桶当中国
     void             *value;
 } ngx_hash_key_t;
 
@@ -54,44 +54,44 @@ typedef struct {
     ngx_hash_wildcard_t  *wc_tail;
 } ngx_hash_combined_t;
 /*
-hash:	���ֶ����ΪNULL����ô�������ʼ��������
-���ֶ�ָ���´���������hash����������ֶβ�ΪNULL��
-��ô�ڳ�ʼ��ʱ�����е����ݱ�����������ֶ���ָ��hash���С�
+hash:	该字段如果为NULL，那么调用完初始化函数后，
+该字段指向新创建出来的hash表。如果该字段不为NULL，
+那么在初始的时候，所有的数据被插入了这个字段所指的hash表中。
 
-key:	ָ����ַ�������hashֵ��hash������
-nginx��Դ�������ṩ��Ĭ�ϵ�ʵ�ֺ���ngx_hash_key_lc��
+key:	指向从字符串生成hash值的hash函数。
+nginx的源代码中提供了默认的实现函数ngx_hash_key_lc。
 
-max_size:	hash���е�Ͱ�ĸ��������ֶ�Խ��
-Ԫ�ش洢ʱ��ͻ�Ŀ�����ԽС��ÿ��Ͱ�д洢��Ԫ�ػ���٣�
-���ѯ�������ٶȸ��졣��Ȼ�����ֵԽ��Խ����ڴ����
-��ҲԽ��(ʵ����Ҳ�˷Ѳ��˶���)��
+max_size:	hash表中的桶的个数。该字段越大，
+元素存储时冲突的可能性越小，每个桶中存储的元素会更少，
+则查询起来的速度更快。当然，这个值越大，越造成内存的浪
+费也越大，(实际上也浪费不了多少)。
 
-bucket_size:	ÿ��Ͱ��������ƴ�С����λ���ֽڡ�
-����ڳ�ʼ��һ��hash����ʱ�򣬷���ĳ��Ͱ��
-���޷�������������ڸ�Ͱ��Ԫ�أ���hash����ʼ��ʧ�ܡ�
+bucket_size:	每个桶的最大限制大小，单位是字节。
+如果在初始化一个hash表的时候，发现某个桶里
+面无法存的下所有属于该桶的元素，则hash表初始化失败。
 
-name:	��hash�������֡�
+name:	该hash表的名字。
 
-pool:	��hash�������ڴ�ʹ�õ�pool��
+pool:	该hash表分配内存使用的pool。
 
-temp_pool:	��hash��ʹ�õ���ʱpool���ڳ�ʼ������Ժ�
-��pool���Ա��ͷź����ٵ�
+temp_pool:	该hash表使用的临时pool，在初始化完成以后，
+该pool可以被释放和销毁掉
 */
 
 typedef struct {
-	// ��ϣͰ�ṹ
+	// 哈希桶结构
     ngx_hash_t       *hash;
-	// hash����ָ��
+	// hash函数指针
     ngx_hash_key_pt   key;
-	// Ͱ������
+	// 桶的数量
     ngx_uint_t        max_size;
-	// ÿ��ͰԪ�ش�С
+	// 每个桶元素大小
     ngx_uint_t        bucket_size;
-	// ��ϣ�������ƣ�������־���
+	// 哈希表的名称，用于日志输出
     char             *name;
-	// �����ڴ��
+	// 分配内存池
     ngx_pool_t       *pool;
-	// ��ʱ�ڴ�أ����ڳ�ʼ��
+	// 临时内存池，用于初始化
     ngx_pool_t       *temp_pool;
 } ngx_hash_init_t;
 

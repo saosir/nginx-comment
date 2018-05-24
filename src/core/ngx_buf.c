@@ -44,7 +44,7 @@ ngx_create_temp_buf(ngx_pool_t *pool, size_t size)
 }
 
 
-// ´Ópool chainÁ´±íµÃµ½»òÕß´ÓÄÚ´æ³Ø·ÖÅäÒ»¸öchain
+// ä»pool chainé“¾è¡¨å¾—åˆ°æˆ–è€…ä»å†…å­˜æ± åˆ†é…ä¸€ä¸ªchain
 ngx_chain_t *
 ngx_alloc_chain_link(ngx_pool_t *pool)
 {
@@ -58,7 +58,7 @@ ngx_alloc_chain_link(ngx_pool_t *pool)
     }
 
     cl = ngx_palloc(pool, sizeof(ngx_chain_t));
-	// ÏÂÃæµÄÅĞ¶Ï?
+	// ä¸‹é¢çš„åˆ¤æ–­?
     if (cl == NULL) {
         return NULL;
     }
@@ -66,8 +66,8 @@ ngx_alloc_chain_link(ngx_pool_t *pool)
     return cl;
 }
 
-// ·ÖÅäbufs´óĞ¡µÄÄÚ´æ¿é£¬È»ºóµÈ·Öµ½ngx_buf£¬½«
-// ËùÓĞµÄbuf´®Áª³ÉÁ´±íngx_chain_t·µ»Ø
+// åˆ†é…bufså¤§å°çš„å†…å­˜å—ï¼Œç„¶åç­‰åˆ†åˆ°ngx_bufï¼Œå°†
+// æ‰€æœ‰çš„bufä¸²è”æˆé“¾è¡¨ngx_chain_tè¿”å›
 ngx_chain_t *
 ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
 {
@@ -75,14 +75,14 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
     ngx_int_t     i;
     ngx_buf_t    *b;
     ngx_chain_t  *chain, *cl, **ll;
-	// ·ÖÅäbufs->num * bufs->size´óĞ¡µÄÄÚ´æ£¬È»ºó½«
-	// Õâ¿éÄÚ´æµÈ·Ö¸øngx_buf
+	// åˆ†é…bufs->num * bufs->sizeå¤§å°çš„å†…å­˜ï¼Œç„¶åå°†
+	// è¿™å—å†…å­˜ç­‰åˆ†ç»™ngx_buf
     p = ngx_palloc(pool, bufs->num * bufs->size);
     if (p == NULL) {
         return NULL;
     }
 
-    ll = &chain; // µÈ·ÖºóµÄngx_buf´®Áª³ÉÁ´±í
+    ll = &chain; // ç­‰åˆ†åçš„ngx_bufä¸²è”æˆé“¾è¡¨
 
     for (i = 0; i < bufs->num; i++) {
 
@@ -108,14 +108,14 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
         b->temporary = 1;
 
         b->start = p;
-        p += bufs->size; //Ã¿¸öngx_buf´óĞ¡¶¼Îªbufs->size
+        p += bufs->size; //æ¯ä¸ªngx_bufå¤§å°éƒ½ä¸ºbufs->size
         b->end = p;
 
         cl = ngx_alloc_chain_link(pool);
         if (cl == NULL) {
             return NULL;
         }
-		// µ¥ÏòÁ´±íÎ²²å·¨
+		// å•å‘é“¾è¡¨å°¾æ’æ³•
         cl->buf = b;
         *ll = cl;
         ll = &cl->next;
@@ -126,9 +126,9 @@ ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs)
     return chain;
 }
 
-// ½«inÁ´±íÖĞµÄbuf¹Ò½Óµ½chainµÄÎ²²¿
-// ×¢ÒâÕâÀïµÄchainÊÇÖ¸ÕëµÄÖ¸Õë£¬
-// ¼´Ê¹*chain==NULLÒ²ÊÇÃ»ÓĞ¹ØÏµµÄ
+// å°†iné“¾è¡¨ä¸­çš„bufæŒ‚æ¥åˆ°chainçš„å°¾éƒ¨
+// æ³¨æ„è¿™é‡Œçš„chainæ˜¯æŒ‡é’ˆçš„æŒ‡é’ˆï¼Œ
+// å³ä½¿*chain==NULLä¹Ÿæ˜¯æ²¡æœ‰å…³ç³»çš„
 ngx_int_t
 ngx_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain, ngx_chain_t *in)
 {
@@ -157,7 +157,7 @@ ngx_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain, ngx_chain_t *in)
     return NGX_OK;
 }
 
-// ´ÓfreeÁ´±íµÃµ½Ò»¸öbuf½Úµã,·ñÔò´ÓÄÚ´æ³ØÉêÇë
+// ä»freeé“¾è¡¨å¾—åˆ°ä¸€ä¸ªbufèŠ‚ç‚¹,å¦åˆ™ä»å†…å­˜æ± ç”³è¯·
 ngx_chain_t *
 ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
 {
@@ -185,8 +185,8 @@ ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
     return cl;
 }
 
-// ½«outºÏ²¢µ½busy£¬ÊÍ·ÅbusyÖĞbufÎª0µÄ½Úµã£¬
-// ·Çtag½Úµã¹é»¹µ½ÄÚ´æ³Ø£¬tag½Úµã·Åµ½freeÁ´±í
+// å°†outåˆå¹¶åˆ°busyï¼Œé‡Šæ”¾busyä¸­bufä¸º0çš„èŠ‚ç‚¹ï¼Œ
+// étagèŠ‚ç‚¹å½’è¿˜åˆ°å†…å­˜æ± ï¼ŒtagèŠ‚ç‚¹æ”¾åˆ°freeé“¾è¡¨
 void
 ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
     ngx_chain_t **out, ngx_buf_tag_t tag)
@@ -196,7 +196,7 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
     if (*busy == NULL) {
         *busy = *out;
 
-    } else {// ¸ÄÎªelse if (*out) »á²»»áºÃÒ»µã
+    } else {// æ”¹ä¸ºelse if (*out) ä¼šä¸ä¼šå¥½ä¸€ç‚¹
         for (cl = *busy; cl->next; cl = cl->next) { /* void */ }
 
         cl->next = *out;
@@ -206,22 +206,22 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
 
     while (*busy) {
         cl = *busy;
-		// ÕÒµ½Ò»¸öbufÄÚ´æ´óĞ¡·Ç0Ö±½ÓÌø³ö£¬ËµÃ÷ºóÃæµÄ
-		// µÄbuf¶¼ÊÇ·Ç0
+		// æ‰¾åˆ°ä¸€ä¸ªbufå†…å­˜å¤§å°é0ç›´æ¥è·³å‡ºï¼Œè¯´æ˜åé¢çš„
+		// çš„buféƒ½æ˜¯é0
         if (ngx_buf_size(cl->buf) != 0) {
             break;
         }
-		// ÊÍ·Å·ÇtagÀàĞÍÇÒÄÚ´æÎª0µÄbuf
+		// é‡Šæ”¾étagç±»å‹ä¸”å†…å­˜ä¸º0çš„buf
         if (cl->buf->tag != tag) {
             *busy = cl->next;
             ngx_free_chain(p, cl);
             continue;
         }
-		// ÖØÖÃÎ»ÖÃ£¬ÒòÎªposºÍlast»áÒ»Ö±ÍùºóÆ«ÒÆ
+		// é‡ç½®ä½ç½®ï¼Œå› ä¸ºposå’Œlastä¼šä¸€ç›´å¾€ååç§»
         cl->buf->pos = cl->buf->start;
         cl->buf->last = cl->buf->start;
 
-		// ÖØÖÃºóµÄbuf·Åµ½freeÁ´±í
+		// é‡ç½®åçš„bufæ”¾åˆ°freeé“¾è¡¨
         *busy = cl->next;
         cl->next = *free;
         *free = cl;

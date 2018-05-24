@@ -19,140 +19,140 @@ typedef struct ngx_buf_s  ngx_buf_t;
 
 struct ngx_buf_with_comment_s {
     /*
-     * posͨ������������ʹ���߱���Ӧ�ô�pos���λ�ÿ�ʼ�����ڴ��е����ݣ�������������Ϊͬһ��
-     * ngx_buf_t���ܱ���η�����������Ȼ��pos�ĺ�������ʹ������ģ�嶨���
+     * pos通常是用来告诉使用者本次应该从pos这个位置开始处理内存中的数据，这样设置是因为同一个
+     * ngx_buf_t可能被多次反复处理。当然，pos的含义是由使用它的模板定义的
      */
     u_char  *pos;
                                
-    /* lastͨ����ʾ��Ч�����ݵ���Ϊֹ��ע�⣬pos��last֮����ڴ���ϣ��nginx���������� */
+    /* last通常表示有效的内容到此为止，注意，pos与last之间的内存是希望nginx处理的内容 */
     u_char  *last;
                                
     /*
-     * �����ļ�ʱ��file_pos��file_last�ĺ����봦���ڴ�ʱ��pos��last��ͬ��
-     * file_pos��ʾ��Ҫ�������ļ�λ�ã�file_last��ʾ�������ļ�λ�á�
+     * 处理文件时，file_pos与file_last的含义与处理内存时的pos与last相同，
+     * file_pos表示将要处理的文件位置，file_last表示截至的文件位置。
      */
     off_t   file_pos;
     off_t   file_last;
                                
-    /* ���ngx_buf_t�����������ڴ棬��ôstartָ������ڴ����ʼ��ַ */
+    /* 如果ngx_buf_t缓冲区用于内存，那么start指向这段内存的起始地址 */
     u_char  *start;
                                
-    /* ��start��Ա��Ӧ��ָ�򻺳����ڴ��ĩβ */
+    /* 与start成员对应，指向缓冲区内存的末尾 */
     u_char  *end;
                                
-    /* ��ʾ��ǰ�����������ͣ��������ĸ�ģ��ʹ�þ�ָ�����ģ��ngx_module_t�����ĵ�ַ */
+    /* 表示当前缓冲区的类型，例如由哪个模块使用就指向这个模块ngx_module_t变量的地址 */
     ngx_buf_tag_t  tag;
                                
-    /* ���õ��ļ� */
+    /* 引用的文件 */
     ngx_file_t  *file;
                                
     /*
-     * ��ǰ��������Ӱ�ӻ��������ó�Ա�����õ�����������ת�����η���������Ӧʱ��ʹ����shadow��Ա��
-     * ������Ϊnginx̫��Լ�ڴ��ˣ�����һ���ڴ沢ʹ��ngx_buf_t��ʾ���յ������η�������Ӧ��
-     * �������οͻ���ת��ʱ���ܻ������ڴ�洢���ļ��У�Ҳ����ֱ�������η��ͣ���ʱnginx���Բ���
-     * ���¸���һ���ڴ������µ�Ŀ�ģ������ٴν���һ��ngx_buf_t�ṹ��ָ��ԭ�ڴ棬�������ngx_buf_t
-     * �ṹ��ָ����ͬһ���ڴ棬����֮��Ĺ�ϵ��ͨ��shadow��Ա�����ã�һ�㲻����ʹ�á�
+     * 当前缓冲区的影子缓冲区，该成员很少用到。当缓冲区转发上游服务器的响应时才使用了shadow成员，
+     * 这是因为nginx太节约内存了，分配一块内存并使用ngx_buf_t表示接收到的上游服务器响应后，
+     * 在向下游客户端转发时可能会把这块内存存储到文件中，也可能直接向下游发送，此时nginx绝对不会
+     * 重新复制一份内存用于新的目的，而是再次建立一个ngx_buf_t结构体指向原内存，这样多个ngx_buf_t
+     * 结构体指向了同一份内存，它们之间的关系就通过shadow成员来引用，一般不建议使用。
      */
     ngx_buf_t   *shadow;
                                
-    /* ��ʱ�ڴ��־λ��Ϊ1ʱ��ʾ�������ڴ���������ڴ�����޸� */
+    /* 临时内存标志位，为1时表示数据在内存中且这段内存可以修改 */
     unsigned    temporay:1;
                                
-    /* ��־λ��Ϊ1ʱ��ʾ�������ڴ���������ڴ治�����޸� */
+    /* 标志位，为1时表示数据在内存中且这段内存不可以修改 */
     unsigned    memory:1;
                                
-    /* ��־λ��Ϊ1ʱ��ʾ����ڴ�����nmapϵͳ����ӳ������ģ��������޸� */
+    /* 标志位，为1时表示这段内存是用nmap系统调用映射过来的，不可以修改 */
     unsigned    mmap:1;
                                
-    /* ��־λ��Ϊ1ʱ��ʾ�ɻ��� */
+    /* 标志位，为1时表示可回收 */
     unsigned    recycled:1;
                                
-    /* ��־λ��Ϊ1ʱ��ʾ��λ��������������ļ��������ڴ� */
+    /* 标志位，为1时表示这段缓冲区处理的是文件而不是内存 */
     unsigned    in_file:1;
                                
-    /* ��־λ��Ϊ1ʱ��ʾ��Ҫִ��flush���� */
+    /* 标志位，为1时表示需要执行flush操作 */
     unsigned    flush:1;
                                
     /*
-     * ��־λ�����ڲ�����黺����ʱ�Ƿ�ʹ��ͬ����ʽ����������ǣ�����ܻ�����nginx���̣�nginx������
-     * �������������첽�ģ�������֧�ָ߲����Ĺؼ�����Щ��ܴ�����syncΪ1ʱ���ܻ��������ķ�ʽ����I/O
-     * ����������������ʹ������nginxģ�������
+     * 标志位，对于操作这块缓冲区时是否使用同步方式，需谨慎考虑，这可能会阻塞nginx进程，nginx中所有
+     * 操作几乎都是异步的，这是它支持高并发的关键。有些框架代码在sync为1时可能会有阻塞的方式进行I/O
+     * 操作，它的意义视使用它的nginx模块而定。
      */
     unsigned    sync:1;
                                
     /*
-     * ��־λ����ʾ�Ƿ������һ�黺��������Ϊngx_buf_t������ngx_chain_t�����������������Ϊ1ʱ��
-     * ��ʾ��ǰ�����һ��������Ļ�������   
+     * 标志位，表示是否是最后一块缓冲区，因为ngx_buf_t可以由ngx_chain_t链表串联起来，因此为1时，
+     * 表示当前是最后一块待处理的缓冲区。   
      */
     unsigned    last_buf:1;
                                
-    /* ��־λ����ʾ�Ƿ���ngx_chain_t�е����һ�黺���� */
+    /* 标志位，表示是否是ngx_chain_t中的最后一块缓冲区 */
     unsigned    last_in_chain:1;
                                
-    /* ��־λ����ʾ�Ƿ������һ��Ӱ�ӻ���������shadow�����ʹ�á�ͨ��������ʹ���� */
+    /* 标志位，表示是否是最后一个影子缓冲区，与shadow域配合使用。通常不建议使用它 */
     unsigned    last_shadow:1;
                                
-    /* ��־λ����ʾ��ǰ�������Ƿ�������ʱ�ļ� */
+    /* 标志位，表示当前缓冲区是否属于临时文件 */
     unsigned    temp_file:1;
 }
 
 
 /*
 
-pos:	��buf��ָ����������ڴ����ʱ��posָ�����������ݿ�ʼ��λ�á�
-last:	��buf��ָ����������ڴ����ʱ��lastָ�����������ݽ�����λ�á�
+pos:	当buf所指向的数据在内存里的时候，pos指向的是这段数据开始的位置。
+last:	当buf所指向的数据在内存里的时候，last指向的是这段数据结束的位置。
 
-file_pos:	��buf��ָ������������ļ����ʱ��file_posָ�����������ݵĿ�ʼ
-λ�����ļ��е�ƫ������
+file_pos:	当buf所指向的数据是在文件里的时候，file_pos指向的是这段数据的开始
+位置在文件中的偏移量。
 
-file_last:	��buf��ָ������������ļ����ʱ��file_lastָ�����������ݵĽ���
-λ�����ļ��е�ƫ������
+file_last:	当buf所指向的数据是在文件里的时候，file_last指向的是这段数据的结束
+位置在文件中的偏移量。
 
-start:	��buf��ָ����������ڴ����ʱ����һ�����ڴ���������ݿ��ܱ�
-�����ڶ��buf��(������ĳ�������м���������������ݣ���һ�����ݾ���
-Ҫ����ֿ�)����ô��Щbuf�е�start��end��ָ����һ���ڴ�Ŀ�ʼ��ַ�ͽ���
-��ַ����pos��lastָ��buf��ʵ�ʰ��������ݵĿ�ʼ�ͽ�β��
+start:	当buf所指向的数据在内存里的时候，这一整块内存包含的内容可能被
+包含在多个buf中(比如在某段数据中间插入了其他的数据，这一块数据就需
+要被拆分开)。那么这些buf中的start和end都指向这一块内存的开始地址和结束
+地址。而pos和last指向本buf所实际包含的数据的开始和结尾。
 
-end:	���Ͳμ�start��
-tag:	ʵ������һ��void*���͵�ָ�룬ʹ���߿��Թ�������Ķ�����ȥ��ֻҪ��
-ʹ���������塣
+end:	解释参见start。
+tag:	实际上是一个void*类型的指针，使用者可以关联任意的对象上去，只要对
+使用者有意义。
 
-file:	��buf���������������ļ���ʱ��file�ֶ�ָ���Ӧ���ļ�����
+file:	当buf所包含的内容在文件中时，file字段指向对应的文件对象。
 
-shadow:	�����buf����copy������һ��buf�������ֶε�ʱ����ô������bufָ���ʵ����
-��ͬһ���ڴ棬������ͬһ���ļ���ͬһ���֣���ʱ������buf��shadow�ֶζ���ָ��
-�Է��ġ���ô��������������buf�����ͷŵ�ʱ�򣬾���Ҫʹ�����ر�С�ģ�������
-�������ͷţ�Ҫ��ǰ���Ǻã���������Դ�Ķ���ͷţ����ܻ���ɳ��������
+shadow:	当这个buf完整copy了另外一个buf的所有字段的时候，那么这两个buf指向的实际上
+是同一块内存，或者是同一个文件的同一部分，此时这两个buf的shadow字段都是指向
+对方的。那么对于这样的两个buf，在释放的时候，就需要使用者特别小心，具体是
+由哪里释放，要提前考虑好，如果造成资源的多次释放，可能会造成程序崩溃！
 
-temporary:	Ϊ1ʱ��ʾ��buf����������������һ���û��������ڴ���У����ҿ��Ա�
-��filter�����Ĺ����н��б����������������⡣
+temporary:	为1时表示该buf所包含的内容是在一个用户创建的内存块中，并且可以被
+在filter处理的过程中进行变更，而不会造成问题。
 
-memory:	Ϊ1ʱ��ʾ��buf�����������������ڴ��У�������Щ����ȴ���ܱ����д�����
-filter���б����
+memory:	为1时表示该buf所包含的内容是在内存中，但是这些内容却不能被进行处理的
+filter进行变更。
 
-mmap:	Ϊ1ʱ��ʾ��buf�����������������ڴ���, ��ͨ��mmapʹ���ڴ�ӳ����ļ���ӳ
-�䵽�ڴ��еģ���Щ����ȴ���ܱ����д�����filter���б����
+mmap:	为1时表示该buf所包含的内容是在内存中, 是通过mmap使用内存映射从文件中映
+射到内存中的，这些内容却不能被进行处理的filter进行变更。
 
-recycled:	���Ի��յġ�Ҳ�������buf�ǿ��Ա��ͷŵġ�����ֶ�ͨ�������shadow��
-��һ��ʹ�õģ�����ʹ��ngx_create_temp_buf ����������buf������������һ��buf��shadow��
-��ô����ʹ������ֶ�����ʾ���buf�ǿ��Ա��ͷŵġ�
+recycled:	可以回收的。也就是这个buf是可以被释放的。这个字段通常是配合shadow字
+段一起使用的，对于使用ngx_create_temp_buf 函数创建的buf，并且是另外一个buf的shadow，
+那么可以使用这个字段来标示这个buf是可以被释放的。
 
-in_file:	Ϊ1ʱ��ʾ��buf�����������������ļ��С�
-flush:	������flush�ֶα�����Ϊ1�ĵ�buf��chain�����chain�����ݼ��㲻����������
-���ݣ�last_buf�����ã���־����Ҫ��������ݶ����ˣ���Ҳ����������������
-postpone_output���õ����ƣ����ǻ��ܵ��������ʵ��������������ơ�
+in_file:	为1时表示该buf所包含的内容是在文件中。
+flush:	遇到有flush字段被设置为1的的buf的chain，则该chain的数据即便不是最后结束的
+数据（last_buf被设置，标志所有要输出的内容都完了），也会进行输出，不会受
+postpone_output配置的限制，但是会受到发送速率等其他条件的限制。
 
 sync:	
-last_buf:	���ݱ��Զ��chain���ݸ��˹����������ֶ�Ϊ1�����������һ��buf��
+last_buf:	数据被以多个chain传递给了过滤器，此字段为1表明这是最后一个buf。
 
-last_in_chain:	�ڵ�ǰ��chain���棬��buf�����һ�����ر�Ҫע�����last_in_chain��buf��һ
-����last_buf������last_buf��bufһ����last_in_chain�ġ�������Ϊ���ݻᱻ�Զ��chain����
-��ĳ��filterģ�顣
+last_in_chain:	在当前的chain里面，此buf是最后一个。特别要注意的是last_in_chain的buf不一
+定是last_buf，但是last_buf的buf一定是last_in_chain的。这是因为数据会被以多个chain传递
+给某个filter模块。
 
-last_shadow:	�ڴ���һ��buf��shadow��ʱ��ͨ�����´�����һ��buf��last_shadow��Ϊ1��
+last_shadow:	在创建一个buf的shadow的时候，通常将新创建的一个buf的last_shadow置为1。
 
-temp_file:	�����ܵ��ڴ�ʹ�õ����ƣ���ʱ��һЩbuf��������Ҫ��д�������ϵ�
-��ʱ�ļ���ȥ����ô��ʱ�������ô˱�־ ��
+temp_file:	由于受到内存使用的限制，有时候一些buf的内容需要被写到磁盘上的
+临时文件中去，那么这时，就设置此标志 。
 
 */
 struct ngx_buf_s {

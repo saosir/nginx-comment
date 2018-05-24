@@ -13,19 +13,19 @@
  * find the middle queue element if the queue has odd number of elements
  * or the first element of the queue's second part otherwise
  */
-// ÕÒµ½ÖĞ¼ä½Úµã£¬Ê¹ÓÃµÄ·½·¨ÊÇÓÃÁ½¸öÖ¸ÕëmiddleºÍnext
-// Í¬Ê±¿ªÊ¼ÒÆ¶¯£¬Ã¿´ÎÒÆ¶¯middleÒÆ¶¯Ò»²½£¬nextÒÆ¶¯Á½²½
-// µ±nextµ½×îºó£¬middle¼´ÎªÖĞ¼ä½Úµã
-// Èç¹û¶ÓÁĞ½ÚµãÊıÎªÆæÊı£¬·µ»ØÖĞ¼ä£¬ÎªÅ¼Êı·µ»ØµÚ¶ş
-// ²¿·ÖµÄµÚÒ»¸öÔªËØ
-// Èç:
-// 		[1,2,3,4,5]·µ»Ø3
-//		[1,2,3,4]·µ»Ø3
+// æ‰¾åˆ°ä¸­é—´èŠ‚ç‚¹ï¼Œä½¿ç”¨çš„æ–¹æ³•æ˜¯ç”¨ä¸¤ä¸ªæŒ‡é’ˆmiddleå’Œnext
+// åŒæ—¶å¼€å§‹ç§»åŠ¨ï¼Œæ¯æ¬¡ç§»åŠ¨middleç§»åŠ¨ä¸€æ­¥ï¼Œnextç§»åŠ¨ä¸¤æ­¥
+// å½“nextåˆ°æœ€åï¼Œmiddleå³ä¸ºä¸­é—´èŠ‚ç‚¹
+// å¦‚æœé˜Ÿåˆ—èŠ‚ç‚¹æ•°ä¸ºå¥‡æ•°ï¼Œè¿”å›ä¸­é—´ï¼Œä¸ºå¶æ•°è¿”å›ç¬¬äºŒ
+// éƒ¨åˆ†çš„ç¬¬ä¸€ä¸ªå…ƒç´ 
+// å¦‚:
+// 		[1,2,3,4,5]è¿”å›3
+//		[1,2,3,4]è¿”å›3
 ngx_queue_t *
 ngx_queue_middle(ngx_queue_t *queue)
 {
     ngx_queue_t  *middle, *next;
-	// Ö»ÓĞÒ»¸ö½Úµã»òÕßÎª¿Õ
+	// åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹æˆ–è€…ä¸ºç©º
     middle = ngx_queue_head(queue);
 
     if (middle == ngx_queue_last(queue)) {
@@ -60,7 +60,7 @@ ngx_queue_sort(ngx_queue_t *queue,
 {
     ngx_queue_t  *q, *prev, *next;
 
-	// Ö»ÓĞÒ»¸ö½Úµã»òÕßÎª¿Õ
+	// åªæœ‰ä¸€ä¸ªèŠ‚ç‚¹æˆ–è€…ä¸ºç©º
     q = ngx_queue_head(queue);
 
     if (q == ngx_queue_last(queue)) {
@@ -82,7 +82,7 @@ ngx_queue_sort(ngx_queue_t *queue,
             prev = ngx_queue_prev(prev);
 
         } while (prev != ngx_queue_sentinel(queue));
-		// q > prev½«Æä²åµ½prevºóÃæ
+		// q > prevå°†å…¶æ’åˆ°prevåé¢
         ngx_queue_insert_after(prev, q);
     }
 }

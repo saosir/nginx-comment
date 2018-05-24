@@ -39,9 +39,9 @@ ngx_array_destroy(ngx_array_t *a)
     ngx_pool_t  *p;
 
     p = a->pool;
-	// ¸ÕºÃÊÇ´ÓÄÚ´æ³ØÎ²²¿ÉêÇëµÄÊı¾İ£¬Ö±½Ó
-	// ĞŞ¸ÄÄÚ´æ³ØÖ¸Õë£¬»ØÊÕÄÚ´æ£¬·ñÔòºöÂÔ
-	// Ö®£¬Ö±µ½´İ»ÙÄÚ´æÔÙÍ³Ò»ÊÍ·ÅÄÚ´æ
+	// åˆšå¥½æ˜¯ä»å†…å­˜æ± å°¾éƒ¨ç”³è¯·çš„æ•°æ®ï¼Œç›´æ¥
+	// ä¿®æ”¹å†…å­˜æ± æŒ‡é’ˆï¼Œå›æ”¶å†…å­˜ï¼Œå¦åˆ™å¿½ç•¥
+	// ä¹‹ï¼Œç›´åˆ°æ‘§æ¯å†…å­˜å†ç»Ÿä¸€é‡Šæ”¾å†…å­˜
     if ((u_char *) a->elts + a->size * a->nalloc == p->d.last) {
         p->d.last -= a->size * a->nalloc;
     }
@@ -59,7 +59,7 @@ ngx_array_push(ngx_array_t *a)
     size_t       size;
     ngx_pool_t  *p;
 
-	// Êı×éÓÃÍê
+	// æ•°ç»„ç”¨å®Œ
     if (a->nelts == a->nalloc) {
 
         /* the array is full */
@@ -67,7 +67,7 @@ ngx_array_push(ngx_array_t *a)
         size = a->size * a->nalloc;
 
         p = a->pool;
-		// Èç¹ûÊı×éÔªËØÔÚÄÚ´æ³ØÒ³Î²²¿
+		// å¦‚æœæ•°ç»„å…ƒç´ åœ¨å†…å­˜æ± é¡µå°¾éƒ¨
         if ((u_char *) a->elts + size == p->d.last
             && p->d.last + a->size <= p->d.end)
         {
@@ -81,7 +81,7 @@ ngx_array_push(ngx_array_t *a)
 
         } else {
             /* allocate a new array */
-			// Ö±½ÓÖØĞÂ·ÖÅä
+			// ç›´æ¥é‡æ–°åˆ†é…
             new = ngx_palloc(p, 2 * size);
             if (new == NULL) {
                 return NULL;

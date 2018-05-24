@@ -13,12 +13,12 @@
 #include <ngx_core.h>
 
 /*
-�ڴ�س�ʼ����ʱ����Ĳ���size��ʾpagesize�������ڴ��ʱ��
-��������pagesize���з��䣬�ڴ�صĲ������ݽṹ�洢�����
-pagesize��С���ڴ�ͷ�����ڴ����һ�������������pagesize��С��
-�ڴ�����ӳ�������Ϊ�˴洢һЩ�ڴ�������Ϣ��������ͷ
-�����ͨԪ�ض�ռ��һЩ�����ֽ�,��������ͷ����ͨ����Ԫ��
-���ڵ��ڴ��Ĵ�С����һ���Ĵ�СΪpagesize
+内存池初始化的时候传入的参数size表示pagesize，分配内存的时候
+会根据这个pagesize进行分配，内存池的部分数据结构存储在这个
+pagesize大小的内存头部，内存池是一个链表，将多个pagesize大小的
+内存块链接成链表，为了存储一些内存池相关信息所以链表头
+会比普通元素多占用一些额外字节,但是链表头与普通链表元素
+所在的内存块的大小都是一样的大小为pagesize
 
 */
 /*
@@ -54,56 +54,56 @@ struct ngx_pool_large_s {
 };
 
 /*
-last��	��һ��unsigned char ���͵�ָ�룬�������/��ǰ�ڴ�ط��䵽
-		ĩλ��ַ������һ�η���Ӵ˴���ʼ��
+last：	是一个unsigned char 类型的指针，保存的是/当前内存池分配到
+		末位地址，即下一次分配从此处开始。
 
-end���ڴ�ؽ���λ�ã�
+end：内存池结束位置；
 
-next��	�ڴ�������кܶ���ڴ棬��Щ�ڴ�����ͨ����ָ����
-		�������ģ�nextָ����һ���ڴ档
+next：	内存池里面有很多块内存，这些内存块就是通过该指针连
+		成链表的，next指向下一块内存。
 
-failed���ڴ�ط���ʧ�ܴ�����
+failed：内存池分配失败次数。
 
 */
 typedef struct {
-    u_char               *last; // ��ǰ���䵽�ڴ��Ǹ�λ�ã�last֮ǰ���ڴ����ѷ����ȥ
-    u_char               *end;  // �ڴ�ҳβ����end-last����֪����ʣ������ڴ����ʹ��
-    ngx_pool_t           *next; // ָ����һ���ڴ�ҳ
-    ngx_uint_t            failed; // ���ڴ�ҳ����ʧ�ܴ���
+    u_char               *last; // 当前分配到内存那个位置，last之前的内存是已分配出去
+    u_char               *end;  // 内存页尾部，end-last可以知道还剩余多少内存可以使用
+    ngx_pool_t           *next; // 指向下一个内存页
+    ngx_uint_t            failed; // 改内存页分配失败次数
 } ngx_pool_data_t;
 
 
 /*
-d���ڴ�ص����ݿ飻
+d：内存池的数据块；
 
-max���ڴ�����ݿ�����ֵ��
+max：内存池数据块的最大值；
 
-current��ָ��ǰ�ڴ�أ�
+current：指向当前内存池；
 
-chain����ָ��ҽ�һ��ngx_chain_t�ṹ��
+chain：该指针挂接一个ngx_chain_t结构；
 
-large������ڴ�������������ռ䳬��max�����ʹ�ã�
+large：大块内存链表，即分配空间超过max的情况使用；
 
-cleanup���ͷ��ڴ�ص�callback
+cleanup：释放内存池的callback
 
-log����־��Ϣ
+log：日志信息
 
 */
 struct ngx_pool_s {
     ngx_pool_data_t       d;
-	// ����ͷ����ͨԪ��ռ�õĶ����ֽ����ݣ�������ֶ�ֻ��
-	// �ڴ������ͷӵ�У����ڹ����ڴ�����ݽṹ��������ͷ
-	// �ڵ�ֻ��ngx_pool_data_t�ֶΣ��ο�ngx_palloc_block
+	// 链表头比普通元素占用的额外字节数据，下面的字段只有
+	// 内存池链表头拥有，用于管理内存池数据结构，非链表头
+	// 节点只有ngx_pool_data_t字段，参看ngx_palloc_block
 
-	// �ڴ���������޶�������ֵ����ngx_palloc_large���з���
+	// 内存池最大分配限额，超过这个值调用ngx_palloc_large进行分配
     size_t                max; 
-	// ��ǰʹ�õ��ڴ�ҳ
+	// 当前使用的内存页
     ngx_pool_t           *current;
-	// ��ngx_buf���
+	// 与ngx_buf相关
     ngx_chain_t          *chain;
-	//�������max���ڴ��ͳһ�ŵ�large������
+	//申请大于max的内存块统一放到large链表中
     ngx_pool_large_t     *large;
-	// ��Դ�ͷž��
+	// 资源释放句柄
     ngx_pool_cleanup_t   *cleanup;
     ngx_log_t            *log;
 };

@@ -42,7 +42,7 @@ ngx_list_push(ngx_list_t *l)
     ngx_list_part_t  *last;
 
     last = l->last;
-	// ¸Ã½ÚµãÒÑ¾­´æÂúÔªËØ
+	// è¯¥èŠ‚ç‚¹å·²ç»å­˜æ»¡å…ƒç´ 
     if (last->nelts == l->nalloc) {
 
         /* the last part is full, allocate a new list part */
@@ -52,20 +52,20 @@ ngx_list_push(ngx_list_t *l)
             return NULL;
         }
 
-        last->elts = ngx_palloc(l->pool, l->nalloc * l->size); // ´æ·ÅÔªËØµÄÊı×é
+        last->elts = ngx_palloc(l->pool, l->nalloc * l->size); // å­˜æ”¾å…ƒç´ çš„æ•°ç»„
         if (last->elts == NULL) {
             return NULL;
         }
 
         last->nelts = 0;
         last->next = NULL;
-		// ²åÈëÎ²²¿
+		// æ’å…¥å°¾éƒ¨
         l->last->next = last;
         l->last = last;
     }
 
     elt = (char *) last->elts + l->size * last->nelts;
-    last->nelts++; //·ÖÅäÁËÒ»¸öÔªËØ
+    last->nelts++; //åˆ†é…äº†ä¸€ä¸ªå…ƒç´ 
 
     return elt;
 }

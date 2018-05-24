@@ -12,11 +12,11 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-// ÓëÍ¨³£Ê¹ÓÃµÄ×Ö·û´®²»Ò»Ñù£¬²»ÊÇÒÔ'\0'½áÎ²£¬×Ö·û´®Ö¸ÏòµÄÊÇ³£Á¿ÄÚ´æ£¬
-// ²»ÄÜ¸ü¸Ädata×Ö¶ÎÖ¸ÏòµÄÄÚ´æ
+// ä¸é€šå¸¸ä½¿ç”¨çš„å­—ç¬¦ä¸²ä¸ä¸€æ ·ï¼Œä¸æ˜¯ä»¥'\0'ç»“å°¾ï¼Œå­—ç¬¦ä¸²æŒ‡å‘çš„æ˜¯å¸¸é‡å†…å­˜ï¼Œ
+// ä¸èƒ½æ›´æ”¹dataå­—æ®µæŒ‡å‘çš„å†…å­˜
 typedef struct {
     size_t      len;
-    u_char     *data; // Ò»°ãÖ¸Ïò³£Á¿×Ö·û´®£¬²Î¿´ngx_string
+    u_char     *data; // ä¸€èˆ¬æŒ‡å‘å¸¸é‡å­—ç¬¦ä¸²ï¼Œå‚çœ‹ngx_string
 } ngx_str_t;
 
 
@@ -37,7 +37,7 @@ typedef struct {
     u_char     *data;
 } ngx_variable_value_t;
 
-// ×¢Òâ³õÊ¼»¯ngx_str_tµÄlen×Ö¶ÎµÄÊ±ºòÊ¹ÓÃµÄÊÇsizeof(str)-1
+// æ³¨æ„åˆå§‹åŒ–ngx_str_tçš„lenå­—æ®µçš„æ—¶å€™ä½¿ç”¨çš„æ˜¯sizeof(str)-1
 #define ngx_string(str)     { sizeof(str) - 1, (u_char *) str }
 #define ngx_null_string     { 0, NULL }
 #define ngx_str_set(str, text)                                               \
@@ -91,7 +91,7 @@ ngx_strlchr(u_char *p, u_char *last, u_char c)
 #if (NGX_MEMCPY_LIMIT)
 
 void *ngx_memcpy(void *dst, const void *src, size_t n);
-// !!!·µ»ØÖµºÍmemcpy²»Í¬
+// !!!è¿”å›å€¼å’Œmemcpyä¸åŒ
 #define ngx_cpymem(dst, src, n)   (((u_char *) ngx_memcpy(dst, src, n)) + (n))
 
 #else

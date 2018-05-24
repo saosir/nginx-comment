@@ -59,7 +59,7 @@ static char  *months[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 void
 ngx_time_init(void)
 {
-	// 指向上面的时间字符串
+	// 鎸囧悜涓婇潰鐨勬椂闂村瓧绗︿覆
     ngx_cached_err_log_time.len = sizeof("1970/09/28 12:00:00") - 1;
     ngx_cached_http_time.len = sizeof("Mon, 28 Sep 1970 06:00:00 GMT") - 1;
     ngx_cached_http_log_time.len = sizeof("28/Sep/1970:12:00:00 +0600") - 1;
@@ -70,7 +70,7 @@ ngx_time_init(void)
     ngx_time_update();
 }
 
-// 获取系统时间，并更新对应的时间字符串
+// 鑾峰彇绯荤粺鏃堕棿锛屽苟鏇存柊瀵瑰簲鐨勬椂闂村瓧绗︿覆
 void
 ngx_time_update(void)
 {
@@ -99,7 +99,7 @@ ngx_time_update(void)
         ngx_unlock(&ngx_time_lock);
         return;
     }
-	// 回滚slot &= NGX_TIME_SLOTS - 1
+	// 鍥炴粴slot &= NGX_TIME_SLOTS - 1
     if (slot == NGX_TIME_SLOTS - 1) {
         slot = 0;
     } else {

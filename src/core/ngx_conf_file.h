@@ -110,8 +110,8 @@ struct ngx_open_file_s {
 
 struct ngx_module_s {
     ngx_uint_t            ctx_index;
-	// mainº¯ÊýÖÐ£¬ÔÚngx_init_cycleµ÷ÓÃÖ®Ç°»áÍ³Ò»·ÖÅäÏÂ±ê
-	// ±íÊ¾ÔÚcycle->conf_ctxµÄÏÂ±êngx_get_conf(cycle->conf_ctx, ngx_core_module)
+	// mainå‡½æ•°ä¸­ï¼Œåœ¨ngx_init_cycleè°ƒç”¨ä¹‹å‰ä¼šç»Ÿä¸€åˆ†é…ä¸‹æ ‡
+	// è¡¨ç¤ºåœ¨cycle->conf_ctxçš„ä¸‹æ ‡ngx_get_conf(cycle->conf_ctx, ngx_core_module)
     ngx_uint_t            index;
 
     ngx_uint_t            spare0;
@@ -121,8 +121,8 @@ struct ngx_module_s {
 
     ngx_uint_t            version;
 
-    // ²»Í¬Ä£¿é»áÓÐ²»Í¬context£¬
-    // Èçngx_epoll_moduleµÄctxÎªngx_event_module_t ngx_epoll_module_ctx
+    // ä¸åŒæ¨¡å—ä¼šæœ‰ä¸åŒcontextï¼Œ
+    // å¦‚ngx_epoll_moduleçš„ctxä¸ºngx_event_module_t ngx_epoll_module_ctx
     void                 *ctx;
     ngx_command_t        *commands;
     ngx_uint_t            type;
@@ -151,7 +151,7 @@ struct ngx_module_s {
 
 typedef struct {
     ngx_str_t             name;
-    void               *(*create_conf)(ngx_cycle_t *cycle); // ·µ»ØÖµ±£´æµ½cycle->conf_ctx
+    void               *(*create_conf)(ngx_cycle_t *cycle); // è¿”å›žå€¼ä¿å­˜åˆ°cycle->conf_ctx
     char               *(*init_conf)(ngx_cycle_t *cycle, void *conf);
 } ngx_core_module_t;
 

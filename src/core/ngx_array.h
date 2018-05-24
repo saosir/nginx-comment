@@ -14,11 +14,11 @@
 
 
 struct ngx_array_s {
-    void        *elts; 		//ÔªËØÊ×µØÖ·
-    ngx_uint_t   nelts;		//ÔªËØÊıÁ¿
-    size_t       size;		//Ã¿¸öÔªËØ´óĞ¡
-    ngx_uint_t   nalloc;	//Êı×éµÄÈİÁ¿
-    ngx_pool_t  *pool;		//ÄÚ´æ³Ø
+    void        *elts; 		//å…ƒç´ é¦–åœ°å€
+    ngx_uint_t   nelts;		//å…ƒç´ æ•°é‡
+    size_t       size;		//æ¯ä¸ªå…ƒç´ å¤§å°
+    ngx_uint_t   nalloc;	//æ•°ç»„çš„å®¹é‡
+    ngx_pool_t  *pool;		//å†…å­˜æ± 
 };
 
 
@@ -27,7 +27,7 @@ void ngx_array_destroy(ngx_array_t *a);
 void *ngx_array_push(ngx_array_t *a);
 void *ngx_array_push_n(ngx_array_t *a, ngx_uint_t n);
 
-// ³õÊ¼»¯Êı¾İ±äÁ¿Èç:
+// åˆå§‹åŒ–æ•°æ®å˜é‡å¦‚:
 // ngx_array_t a;
 // ngx_array_init(&a, p, 10, sizeof(int));
 static ngx_inline ngx_int_t

@@ -20,7 +20,7 @@ struct ngx_queue_s {
     ngx_queue_t  *next;
 };
 
-// Í¨¹ıÒ»¸ö¿ÕµÄÍ·½áµã¹ÜÀí¶ÓÁĞ
+// é€šè¿‡ä¸€ä¸ªç©ºçš„å¤´ç»“ç‚¹ç®¡ç†é˜Ÿåˆ—
 #define ngx_queue_init(q)                                                     \
     (q)->prev = q;                                                            \
     (q)->next = q
@@ -83,9 +83,9 @@ struct ngx_queue_s {
 
 #endif
 
-// ½«¶ÔÁ¢´ÓqÔªËØ¿ªÊ¼·ÖÁÑ£¬qÓëºóÃæµÄÔªËØ
-// ×÷ÎªĞÂ¶ÓÁĞ·Åµ½nÖĞ£¬nÎªÒ»¸ö¿Õ¶ÓÁĞ£¬Íê³É
-// ²Ù×÷ºóqÎªnµÄµÚÒ»¸öÔªËØ
+// å°†å¯¹ç«‹ä»qå…ƒç´ å¼€å§‹åˆ†è£‚ï¼Œqä¸åé¢çš„å…ƒç´ 
+// ä½œä¸ºæ–°é˜Ÿåˆ—æ”¾åˆ°nä¸­ï¼Œnä¸ºä¸€ä¸ªç©ºé˜Ÿåˆ—ï¼Œå®Œæˆ
+// æ“ä½œåqä¸ºnçš„ç¬¬ä¸€ä¸ªå…ƒç´ 
 #define ngx_queue_split(h, q, n)                                              \
     (n)->prev = (h)->prev;                                                    \
     (n)->prev->next = n;                                                      \
@@ -94,14 +94,14 @@ struct ngx_queue_s {
     (h)->prev->next = h;                                                      \
     (q)->prev = n;
 
-// h nÎªÁ½¸öqueue£¬½«n¸½¼Óµ½hºóÃæ
+// h nä¸ºä¸¤ä¸ªqueueï¼Œå°†né™„åŠ åˆ°håé¢
 #define ngx_queue_add(h, n)                                                   \
     (h)->prev->next = (n)->next;                                              \
     (n)->next->prev = (h)->prev;                                              \
     (h)->prev = (n)->prev;                                                    \
     (h)->prev->next = h;
 
-// Í¨¹ıqÖ¸Õë£¬¿ÉÒÔµÃµ½Êµ¼Ê½á¹¹ÌåµÄÖ¸Õë
+// é€šè¿‡qæŒ‡é’ˆï¼Œå¯ä»¥å¾—åˆ°å®é™…ç»“æ„ä½“çš„æŒ‡é’ˆ
 #define ngx_queue_data(q, type, link)                                         \
     (type *) ((u_char *) q - offsetof(type, link))
 

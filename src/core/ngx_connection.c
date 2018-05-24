@@ -85,7 +85,7 @@ ngx_create_listening(ngx_conf_t *cf, void *sockaddr, socklen_t socklen)
     return ls;
 }
 
-// ¶Ô¼Ì³Ğ¶øÀ´µÄsocket½øĞĞ³õÊ¼»¯
+// å¯¹ç»§æ‰¿è€Œæ¥çš„socketè¿›è¡Œåˆå§‹åŒ–
 ngx_int_t
 ngx_set_inherited_sockets(ngx_cycle_t *cycle)
 {

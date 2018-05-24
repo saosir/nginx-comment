@@ -792,9 +792,9 @@ ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return rv;
 }
 
-//È·±£nameÊÇ¾ø¶ÔÂ·¾¶£¬Èç¹û²»ÊÇ¾ø¶ÔÂ·¾¶
-//Èç¹ûconf_prefix == 1£¬name=cycle->conf_prefix+name
-//·ñÔòname=cycle->prefix+name
+//ç¡®ä¿nameæ˜¯ç»å¯¹è·¯å¾„ï¼Œå¦‚æœä¸æ˜¯ç»å¯¹è·¯å¾„
+//å¦‚æœconf_prefix == 1ï¼Œname=cycle->conf_prefix+name
+//å¦åˆ™name=cycle->prefix+name
 ngx_int_t
 ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix)
 {
@@ -889,7 +889,7 @@ ngx_conf_test_full_name(ngx_str_t *name)
 #endif
 }
 
-// ½«nameÎÄ¼ş¼ÓÈëcycle->open_filesÖĞ
+// å°†nameæ–‡ä»¶åŠ å…¥cycle->open_filesä¸­
 ngx_open_file_t *
 ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name)
 {
@@ -911,7 +911,7 @@ ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name)
 
         part = &cycle->open_files.part;
         file = part->elts;
-		// È·ÈÏnameÊÇ²»ÊÇÒÑ¾­ÔÚÎÄ¼şÁĞ±íÖĞ
+		// ç¡®è®¤nameæ˜¯ä¸æ˜¯å·²ç»åœ¨æ–‡ä»¶åˆ—è¡¨ä¸­
         for (i = 0; /* void */ ; i++) {
 
             if (i >= part->nelts) {

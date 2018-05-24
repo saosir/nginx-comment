@@ -67,9 +67,9 @@ static void ngx_slab_error(ngx_slab_pool_t *pool, ngx_uint_t level,
 static ngx_uint_t  ngx_slab_max_size;
 // 128byte
 static ngx_uint_t  ngx_slab_exact_size;
-// 32Î»Îª7
+// 32ä½ä¸º7
 static ngx_uint_t  ngx_slab_exact_shift;
-// ngx_slabºÍmemcachedµÄslab alloc»úÖÆ»ù±¾Ò»Ñù
+// ngx_slabå’Œmemcachedçš„slab allocæœºåˆ¶åŸºæœ¬ä¸€æ ·
 
 void
 ngx_slab_init(ngx_slab_pool_t *pool)
@@ -81,31 +81,31 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     ngx_slab_page_t  *slots;
 
     /* STUB */
-    // ÔÚ 32 Î»ÏµÍ³ pagesize Îª 4K µÄ»·¾³ÏÂ
-    // ngx_slab_max_size ÖµÊÇ 2K
+    // åœ¨ 32 ä½ç³»ç»Ÿ pagesize ä¸º 4K çš„ç¯å¢ƒä¸‹
+    // ngx_slab_max_size å€¼æ˜¯ 2K
     if (ngx_slab_max_size == 0) {
             /*
-            Ò»¸ö uintptr_t ÀàĞÍµÄ±äÁ¿×÷Îª bitmap À´Ê¹ÓÃÊ±£¬
-            ¿ÉÒÔÓÃÀ´¸ú×Ù 8 * sizeof(uintptr_t) ¸ö chunk µÄÊ¹ÓÃ×´Ì¬¡£
-            ¡°¸Õ¸ÕºÃ¡± ¿ÉÒÔÓÃÒ»¸ö uintptr_t ¿Õ¼äµÄ bitmap ÄÜ¹»¸ú
-            ×ÙÒ»¸ö slab ÖĞËùÓĞµÄ chunk Ê±£¬chunk µÄ´óĞ¡¾ÍÊÇ ngx_slab_exact_size£¬
-            ËüËùÊô slot µÄ shift Öµ¾ÍÊÇ ngx_slab_exact_shift¡£ ÔÚ 32Î»ÏµÍ³¡¢
-            pagesize Îª 4K µÄ»·¾³ÏÂ£¬ngx_slab_exact_size ÖµÎª 128B£¬ 
-            ngx_slab_exact_shift ÖµÎª 7¡£        */
+            ä¸€ä¸ª uintptr_t ç±»å‹çš„å˜é‡ä½œä¸º bitmap æ¥ä½¿ç”¨æ—¶ï¼Œ
+            å¯ä»¥ç”¨æ¥è·Ÿè¸ª 8 * sizeof(uintptr_t) ä¸ª chunk çš„ä½¿ç”¨çŠ¶æ€ã€‚
+            â€œåˆšåˆšå¥½â€ å¯ä»¥ç”¨ä¸€ä¸ª uintptr_t ç©ºé—´çš„ bitmap èƒ½å¤Ÿè·Ÿ
+            è¸ªä¸€ä¸ª slab ä¸­æ‰€æœ‰çš„ chunk æ—¶ï¼Œchunk çš„å¤§å°å°±æ˜¯ ngx_slab_exact_sizeï¼Œ
+            å®ƒæ‰€å± slot çš„ shift å€¼å°±æ˜¯ ngx_slab_exact_shiftã€‚ åœ¨ 32ä½ç³»ç»Ÿã€
+            pagesize ä¸º 4K çš„ç¯å¢ƒä¸‹ï¼Œngx_slab_exact_size å€¼ä¸º 128Bï¼Œ 
+            ngx_slab_exact_shift å€¼ä¸º 7ã€‚        */
         ngx_slab_max_size = ngx_pagesize / 2;
-       //Ò»Ò³·Ö³É¶à¸ö¿é,¶øÄ³¸ö¿éĞèÒª±ê¼ÇÊÇ·ñ±»·ÖÅä,
-       //¶øÒ»Ò³¿Õ¼äÕıºÃ±»·Ö³É32¸ö128×Ö½Ú´óĞ¡µÄ¿é£¬
-       //ÓÚÊÇÎÒÃÇ¿ÉÒÔÓÃÒ»¸öintµÄ32Î»±íÊ¾Õâ¿éµÄÊ¹ÓÃÇé¿ö£¬
-       //¶ø´ËÊ±,ÎÒÃÇÊÇÊ¹ÓÃngx_slab_page_s½á¹¹ÌåÖĞµÄslab³ÉÔ±À´±íÊ¾¿éµÄÊ¹ÓÃÇé¿öµÄ
+       //ä¸€é¡µåˆ†æˆå¤šä¸ªå—,è€ŒæŸä¸ªå—éœ€è¦æ ‡è®°æ˜¯å¦è¢«åˆ†é…,
+       //è€Œä¸€é¡µç©ºé—´æ­£å¥½è¢«åˆ†æˆ32ä¸ª128å­—èŠ‚å¤§å°çš„å—ï¼Œ
+       //äºæ˜¯æˆ‘ä»¬å¯ä»¥ç”¨ä¸€ä¸ªintçš„32ä½è¡¨ç¤ºè¿™å—çš„ä½¿ç”¨æƒ…å†µï¼Œ
+       //è€Œæ­¤æ—¶,æˆ‘ä»¬æ˜¯ä½¿ç”¨ngx_slab_page_sç»“æ„ä½“ä¸­çš„slabæˆå‘˜æ¥è¡¨ç¤ºå—çš„ä½¿ç”¨æƒ…å†µçš„
 
         ngx_slab_exact_size = ngx_pagesize / (8 * sizeof(uintptr_t));
-		// ngx_slab_exact_size×î¸ßÎ»Êı
+		// ngx_slab_exact_sizeæœ€é«˜ä½æ•°
         for (n = ngx_slab_exact_size; n >>= 1; ngx_slab_exact_shift++) {
             /* void */
         }
     }
     /**/
-	// ÄÚ´æ½á¹¹ngx_slab_pool_t/slots/pages
+	// å†…å­˜ç»“æ„ngx_slab_pool_t/slots/pages
     pool->min_size = 1 << pool->min_shift;
 
     p = (u_char *) pool + sizeof(ngx_slab_pool_t);
@@ -118,16 +118,16 @@ ngx_slab_init(ngx_slab_pool_t *pool)
 
     for (i = 0; i < n; i++) {
         slots[i].slab = 0;
-        slots[i].next = &slots[i];	// Ö¸Ïò×Ô¼º£¬¿ÕÁ´±í
+        slots[i].next = &slots[i];	// æŒ‡å‘è‡ªå·±ï¼Œç©ºé“¾è¡¨
         slots[i].prev = 0;
     }
 
     p += n * sizeof(ngx_slab_page_t);
-	// Ã¿¸öpage´óĞ¡ngx_pagesize + sizeof(ngx_slab_page_t)£¬Ç°Ãæ´æ´¢n*ngx_slab_page_tÊı×é£¬
-	// ºóÃæ´æ´¢n*ngx_pagesizeÒ³ÄÚ´æ
+	// æ¯ä¸ªpageå¤§å°ngx_pagesize + sizeof(ngx_slab_page_t)ï¼Œå‰é¢å­˜å‚¨n*ngx_slab_page_tæ•°ç»„ï¼Œ
+	// åé¢å­˜å‚¨n*ngx_pagesizeé¡µå†…å­˜
     pages = (ngx_uint_t) (size / (ngx_pagesize + sizeof(ngx_slab_page_t)));
-    // ³õÊ¼»¯Ç°ÃæµÄngx_slab_page_tÊı×é£¬×îºóÕâĞ©Êı×é¶¼»á
-    // ¹Ò½Óµ½slots
+    // åˆå§‹åŒ–å‰é¢çš„ngx_slab_page_tæ•°ç»„ï¼Œæœ€åè¿™äº›æ•°ç»„éƒ½ä¼š
+    // æŒ‚æ¥åˆ°slots
     ngx_memzero(p, pages * sizeof(ngx_slab_page_t));
 
     pool->pages = (ngx_slab_page_t *) p;
@@ -139,11 +139,11 @@ ngx_slab_init(ngx_slab_pool_t *pool)
     pool->pages->next = &pool->free;
     pool->pages->prev = (uintptr_t) &pool->free;
 
-    // ×Ö½Ú¶ÔÆë£¬startÖ¸ÏòÄÚ´æÒ³
+    // å­—èŠ‚å¯¹é½ï¼ŒstartæŒ‡å‘å†…å­˜é¡µ
     pool->start = (u_char *)
                   ngx_align_ptr((uintptr_t) p + pages * sizeof(ngx_slab_page_t),
                                  ngx_pagesize);
-	// È·ÈÏÊÇ·ñ»¹Òªµ÷ÕûÖ¸Õë£¬ÒòÎª×îºóÒ»Ò³µÄÄÚ´æ¿ÉÄÜ²»¹»Ò»Ò³
+	// ç¡®è®¤æ˜¯å¦è¿˜è¦è°ƒæ•´æŒ‡é’ˆï¼Œå› ä¸ºæœ€åä¸€é¡µçš„å†…å­˜å¯èƒ½ä¸å¤Ÿä¸€é¡µ
     m = pages - (pool->end - pool->start) / ngx_pagesize;
     if (m > 0) {
         pages -= m;
@@ -177,7 +177,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
     uintptr_t         p, n, m, mask, *bitmap;
     ngx_uint_t        i, slot, shift, map;
     ngx_slab_page_t  *page, *prev, *slots;
-    // ³¬¹ı×î´óÖµ£¬²»´Óslab·ÖÅä
+    // è¶…è¿‡æœ€å¤§å€¼ï¼Œä¸ä»slabåˆ†é…
     if (size >= ngx_slab_max_size) {
 
         ngx_log_debug1(NGX_LOG_DEBUG_ALLOC, ngx_cycle->log, 0,
@@ -195,8 +195,8 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
 
         goto done;
     }
-    // ¼ÆËãµÃµ½Ó¦¸ÃÓÉÄÇ¸öslot·ÖÅäÄÚ´æ£¬
-    // ¸Ãslot·ÖÅäµÄchunk´óĞ¡¸ÕºÃ´óÓÚµÈÓÚsize
+    // è®¡ç®—å¾—åˆ°åº”è¯¥ç”±é‚£ä¸ªslotåˆ†é…å†…å­˜ï¼Œ
+    // è¯¥slotåˆ†é…çš„chunkå¤§å°åˆšå¥½å¤§äºç­‰äºsize
     // 
     if (size > pool->min_size) {
         shift = 1;
@@ -208,63 +208,63 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
         shift = pool->min_shift;
         slot = 0;
     }
-    // ×¢Òâ: 2^shift »òÕß1<<shift±íÊ¾µÄÊÇchunk´óĞ¡
+    // æ³¨æ„: 2^shift æˆ–è€…1<<shiftè¡¨ç¤ºçš„æ˜¯chunkå¤§å°
 
-    // ÏÂÃæ´úÂëÖĞ¿´µ½(xxx) << shift±íÊ¾µÄÊÇ(xxx)*chunk_size
+    // ä¸‹é¢ä»£ç ä¸­çœ‹åˆ°(xxx) << shiftè¡¨ç¤ºçš„æ˜¯(xxx)*chunk_size
     ngx_log_debug2(NGX_LOG_DEBUG_ALLOC, ngx_cycle->log, 0,
                    "slab alloc: %uz slot: %ui", size, slot);
 
     slots = (ngx_slab_page_t *) ((u_char *) pool + sizeof(ngx_slab_pool_t));
     page = slots[slot].next;
-     // ÊÇ·ñÓĞ¿ÕÏĞµÄÒ³ÄÚ´æ    
+     // æ˜¯å¦æœ‰ç©ºé—²çš„é¡µå†…å­˜    
     if (page->next != page) {
         if (shift < ngx_slab_exact_shift) {
-            // ·ÖÅäµÄÄÚ´æĞ¡ÓÚ128byte
-            // Ò»¸ö32Î»µÄslab²»¹»×÷Îªbitmap£¬128*32=4k
-            //ÒòÎªshift<ngx_slab_exact_shift£¬
-            //bitmap±ØÈ»ÏûºÄ´óÓÚ1¸öuintptr_tÀàĞÍ£¬Ò²¼´mapÖÁÉÙÊÇ2
+            // åˆ†é…çš„å†…å­˜å°äº128byte
+            // ä¸€ä¸ª32ä½çš„slabä¸å¤Ÿä½œä¸ºbitmapï¼Œ128*32=4k
+            //å› ä¸ºshift<ngx_slab_exact_shiftï¼Œ
+            //bitmapå¿…ç„¶æ¶ˆè€—å¤§äº1ä¸ªuintptr_tç±»å‹ï¼Œä¹Ÿå³mapè‡³å°‘æ˜¯2
             do {
-                // page - pool->pagesÎªÓÃÓÚ·ÖÅäµÄslabÔÚslabÊı×éµÄÎ»ÖÃ
-                // Ò»¸öpageµÄ´óĞ¡Îª1<<ngx_pagesize_shift£¬ÄÇÃ´p¾ÍÊÇ
-                // ¶ÔÓ¦µÄÄÚ´æÒ³Ïà¶ÔÆğÊ¼Î»ÖÃµÄÆ«ÒÆ
-                p = (page - pool->pages) << ngx_pagesize_shift;//Ïàµ±ÓÚ³ËÒÔÄÚ´æÒ³´óĞ¡
-                // bitmapÖ¸Ïò¶ÔÓÃÓÚ·ÖÅäÄÚ´æµÄslab¹ÜÀíµÄÄÚ´æÒ³
+                // page - pool->pagesä¸ºç”¨äºåˆ†é…çš„slabåœ¨slabæ•°ç»„çš„ä½ç½®
+                // ä¸€ä¸ªpageçš„å¤§å°ä¸º1<<ngx_pagesize_shiftï¼Œé‚£ä¹ˆpå°±æ˜¯
+                // å¯¹åº”çš„å†…å­˜é¡µç›¸å¯¹èµ·å§‹ä½ç½®çš„åç§»
+                p = (page - pool->pages) << ngx_pagesize_shift;//ç›¸å½“äºä¹˜ä»¥å†…å­˜é¡µå¤§å°
+                // bitmapæŒ‡å‘å¯¹ç”¨äºåˆ†é…å†…å­˜çš„slabç®¡ç†çš„å†…å­˜é¡µ
                 bitmap = (uintptr_t *) (pool->start + p);
 
-                // 1 << (ngx_pagesize_shift - shift) ±íÊ¾¸Ãslot¿ÉÒÔ·ÖÅä¶àÉÙ¸öchunk
-                // 1<<shift±íÊ¾¸ÃslotµÄchunk´óĞ¡£¬1<<ngx_pagesize_shift±íÊ¾page´óĞ¡
-                // chunkÊıÁ¿Îª2^ngx_pagesize_shift  / 2^shift  = 2^(ngx_pagesize_shift-shift)
+                // 1 << (ngx_pagesize_shift - shift) è¡¨ç¤ºè¯¥slotå¯ä»¥åˆ†é…å¤šå°‘ä¸ªchunk
+                // 1<<shiftè¡¨ç¤ºè¯¥slotçš„chunkå¤§å°ï¼Œ1<<ngx_pagesize_shiftè¡¨ç¤ºpageå¤§å°
+                // chunkæ•°é‡ä¸º2^ngx_pagesize_shift  / 2^shift  = 2^(ngx_pagesize_shift-shift)
                 map = (1 << (ngx_pagesize_shift - shift))
                           / (sizeof(uintptr_t) * 8);
-                //map±íÊ¾ĞèÒª¶àÉÙ¸öbitmapÀ´Ó³Éä¸ú×ÙËùÓĞµÄchunk
+                //mapè¡¨ç¤ºéœ€è¦å¤šå°‘ä¸ªbitmapæ¥æ˜ å°„è·Ÿè¸ªæ‰€æœ‰çš„chunk
                 for (n = 0; n < map; n++) {
 
                     if (bitmap[n] != NGX_SLAB_BUSY) {
-                        //bitmapËùÓĞÎ»ÀïÃæÓĞ0£¬ËµÃ÷ÓĞ¿ÕÓàµÄchunk
+                        //bitmapæ‰€æœ‰ä½é‡Œé¢æœ‰0ï¼Œè¯´æ˜æœ‰ç©ºä½™çš„chunk
                         for (m = 1, i = 0; m; m <<= 1, i++) {
                             if ((bitmap[n] & m)) {
                                 continue;
                             }
                             
                             bitmap[n] |= m;
-                            // ´ÓÓÒÊı£¬µÚiÎ»Îª0
+                            // ä»å³æ•°ï¼Œç¬¬iä½ä¸º0
 
                             
-                            // µÃµ½¶ÔÓ¦chunkµÄÎ»ÖÃ£¬¼´¸ÃÄÚ´æÒ³
-                            // µÚn*32+i¸öchunk
+                            // å¾—åˆ°å¯¹åº”chunkçš„ä½ç½®ï¼Œå³è¯¥å†…å­˜é¡µ
+                            // ç¬¬n*32+iä¸ªchunk
                             i = ((n * sizeof(uintptr_t) * 8) << shift)
                                 + (i << shift);
 
                             if (bitmap[n] == NGX_SLAB_BUSY) {
                                 for (n = n + 1; n < map; n++) {
                                      if (bitmap[n] != NGX_SLAB_BUSY) {
-                                        // »¹ÓĞ¿ÕÓàµÄchunk
+                                        // è¿˜æœ‰ç©ºä½™çš„chunk
                                          p = (uintptr_t) bitmap + i;
 
                                          goto done;
                                      }
                                 }
-                                // µ½ÕâÀïËµÃ÷¸ÃÄÚ´æÒ³µÄchunkÒÑ¾­È«²¿ÓÃÍê
+                                // åˆ°è¿™é‡Œè¯´æ˜è¯¥å†…å­˜é¡µçš„chunkå·²ç»å…¨éƒ¨ç”¨å®Œ
                                 prev = (ngx_slab_page_t *)
                                             (page->prev & ~NGX_SLAB_PAGE_MASK);//#define NGX_SLAB_PAGE_MASK   3
                                 prev->next = page->next;
@@ -286,7 +286,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
             } while (page);
 
         } else if (shift == ngx_slab_exact_shift) {
-            // 128byte£¬¸ÕºÃ¿ÉÒÔÓÃpage->slab×÷Îªbitmap£¬32Î»
+            // 128byteï¼Œåˆšå¥½å¯ä»¥ç”¨page->slabä½œä¸ºbitmapï¼Œ32ä½
             // pagesize=4k  pagesize/32=128
             do {
                 if (page->slab != NGX_SLAB_BUSY) {
@@ -308,9 +308,9 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                             page->prev = NGX_SLAB_EXACT;
                         }
 
-                        p = (page - pool->pages) << ngx_pagesize_shift; // µÚ¼¸Ò³
-                        p += i << shift;    // Ò³ÄÚÆ«ÒÆ
-                        p += (uintptr_t) pool->start;  // chunkµØÖ·
+                        p = (page - pool->pages) << ngx_pagesize_shift; // ç¬¬å‡ é¡µ
+                        p += i << shift;    // é¡µå†…åç§»
+                        p += (uintptr_t) pool->start;  // chunkåœ°å€
 
                         goto done;
                     }
@@ -321,24 +321,24 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
             } while (page);
 
         } else { /* shift > ngx_slab_exact_shift */
-            //ÒÆÎ»Êı·Ö±ğÎª8¡¢9¡¢10¡¢11ÕâĞ©Çé¿ö£¬²»¿ÉÄÜÎª12
-            //ÒòÎª2^12==2k==ngx_slab_max_size
+            //ç§»ä½æ•°åˆ†åˆ«ä¸º8ã€9ã€10ã€11è¿™äº›æƒ…å†µï¼Œä¸å¯èƒ½ä¸º12
+            //å› ä¸º2^12==2k==ngx_slab_max_size
 
             
-            //¼ÆËã³öÒ»¸öÒ³¿ÉÒÔ·Ö³É¶àÉÙ¸öchunk
-            // ¼ÓÈëchunk´óĞ¡Îª256byte£¬page->slab & NGX_SLAB_SHIFT_MASK¾ÍÊÇ8
-            // 32Î»ngx_pagesize_shiftÎª12¾ÍÊÇ2k£¬¿ÉÒÔµÃµ½nÎª4£¬1<<n¾ÍÊÇ16
-            // Ò²¾ÍÊÇËµ´ËÊ±µÄÄÚ´æÒ³¿ÉÒÔ·ÖÅäÎª16¸öchunk£¬´óĞ¡¶¼Îª256byte
+            //è®¡ç®—å‡ºä¸€ä¸ªé¡µå¯ä»¥åˆ†æˆå¤šå°‘ä¸ªchunk
+            // åŠ å…¥chunkå¤§å°ä¸º256byteï¼Œpage->slab & NGX_SLAB_SHIFT_MASKå°±æ˜¯8
+            // 32ä½ngx_pagesize_shiftä¸º12å°±æ˜¯2kï¼Œå¯ä»¥å¾—åˆ°nä¸º4ï¼Œ1<<nå°±æ˜¯16
+            // ä¹Ÿå°±æ˜¯è¯´æ­¤æ—¶çš„å†…å­˜é¡µå¯ä»¥åˆ†é…ä¸º16ä¸ªchunkï¼Œå¤§å°éƒ½ä¸º256byte
             n = ngx_pagesize_shift - (page->slab & NGX_SLAB_SHIFT_MASK);
             n = 1 << n; 
 
-            // µÃµ½±íÊ¾ÕâĞ©¿éÊı¶¼ÓÃÍêµÄbitmap£¬¼ÓÈë·ÖÅäµÄchunk´óĞ¡256byte
-            // ÏÖÔÚn¾ÍÊÇ16Î»
+            // å¾—åˆ°è¡¨ç¤ºè¿™äº›å—æ•°éƒ½ç”¨å®Œçš„bitmapï¼ŒåŠ å…¥åˆ†é…çš„chunkå¤§å°256byte
+            // ç°åœ¨nå°±æ˜¯16ä½
             n = ((uintptr_t) 1 << n) - 1;
-            mask = n << NGX_SLAB_MAP_SHIFT; // 32Î»ÏµÍ³NGX_SLAB_MAP_SHIFTÎª16
+            mask = n << NGX_SLAB_MAP_SHIFT; // 32ä½ç³»ç»ŸNGX_SLAB_MAP_SHIFTä¸º16
 
             do {
-                if ((page->slab & NGX_SLAB_MAP_MASK) != mask) { // ¸ÃÒ³»¹ÓĞÎ´·ÖÅäµÄchunk
+                if ((page->slab & NGX_SLAB_MAP_MASK) != mask) { // è¯¥é¡µè¿˜æœ‰æœªåˆ†é…çš„chunk
 
                     for (m = (uintptr_t) 1 << NGX_SLAB_MAP_SHIFT, i = 0;
                          m & mask;
@@ -351,7 +351,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                         page->slab |= m;
 
                         if ((page->slab & NGX_SLAB_MAP_MASK) == mask) {
-                            // ¸ÃÄÚ´æÒ³µÄchunk·ÖÅäÍê
+                            // è¯¥å†…å­˜é¡µçš„chunkåˆ†é…å®Œ
                             prev = (ngx_slab_page_t *)
                                             (page->prev & ~NGX_SLAB_PAGE_MASK);
                             prev->next = page->next;
@@ -360,7 +360,7 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                             page->next = NULL;
                             page->prev = NGX_SLAB_BIG;
                         }
-                        // ¼ÆËãchunkµÄÎ»ÖÃ
+                        // è®¡ç®—chunkçš„ä½ç½®
                         p = (page - pool->pages) << ngx_pagesize_shift;
                         p += i << shift;
                         p += (uintptr_t) pool->start;
@@ -374,31 +374,31 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
             } while (page);
         }
     }
-    // Ã»ÓĞ¿ÉÓÃµÄÄÚ´æÒ³¹©slab·ÖÅä£¬ÕâÀï·ÖÅäÒ»¿éÄÚ´æÒ³
-    // ¹Ò½Óµ½¶ÔÓ¦µÄslab²¢½«chunk·ÖÅä³öÈ¥
+    // æ²¡æœ‰å¯ç”¨çš„å†…å­˜é¡µä¾›slabåˆ†é…ï¼Œè¿™é‡Œåˆ†é…ä¸€å—å†…å­˜é¡µ
+    // æŒ‚æ¥åˆ°å¯¹åº”çš„slabå¹¶å°†chunkåˆ†é…å‡ºå»
     page = ngx_slab_alloc_pages(pool, 1);
 
     if (page) {
         if (shift < ngx_slab_exact_shift) {
-            // ĞèÒªÓÃn¸öchunkÀ´±£´æbitmap
+            // éœ€è¦ç”¨nä¸ªchunkæ¥ä¿å­˜bitmap
             p = (page - pool->pages) << ngx_pagesize_shift;
             bitmap = (uintptr_t *) (pool->start + p);
 
             s = 1 << shift; // chunk_size
-            // ÏÂÃæ´úÂëµÄÒâË¼ÊÇ:
+            // ä¸‹é¢ä»£ç çš„æ„æ€æ˜¯:
             // chunk_count = page_size/chunk_size
             // map_bytes = chunk_count/8
             // bitmap_chunks = map_bytes / chunk_size
             // n = bitmap_chunks
-            n = (1 << (ngx_pagesize_shift - shift)) / 8 / s; // n±íÊ¾ĞèÒªÓÃÓÚ´æ´¢bitmapµÄchunkÊıÁ¿
+            n = (1 << (ngx_pagesize_shift - shift)) / 8 / s; // nè¡¨ç¤ºéœ€è¦ç”¨äºå­˜å‚¨bitmapçš„chunkæ•°é‡
 
             if (n == 0) {
                 n = 1;
             }
-            // ÏÂÃæÎª2ÊÇÒòÎªÒª·µ»ØÒ»¸öchunk¸øÉêÇëÕß
-            // ¸ÄÎªbitmap[0] = (1 << (n+1)) - 1;±È½ÏÊÊºÏÈË¿´
+            // ä¸‹é¢ä¸º2æ˜¯å› ä¸ºè¦è¿”å›ä¸€ä¸ªchunkç»™ç”³è¯·è€…
+            // æ”¹ä¸ºbitmap[0] = (1 << (n+1)) - 1;æ¯”è¾ƒé€‚åˆäººçœ‹
             
-            bitmap[0] = (2 << n) - 1; // ±ê×¢n¸öchunkÒÑ¾­±»ÓÃÀ´µ±×öbitmapÊ¹ÓÃ
+            bitmap[0] = (2 << n) - 1; // æ ‡æ³¨nä¸ªchunkå·²ç»è¢«ç”¨æ¥å½“åšbitmapä½¿ç”¨
 
             map = (1 << (ngx_pagesize_shift - shift)) / (sizeof(uintptr_t) * 8);
 
@@ -406,14 +406,14 @@ ngx_slab_alloc_locked(ngx_slab_pool_t *pool, size_t size)
                 bitmap[i] = 0;
             }
 
-            // ½«·ÖÅäµ½µÄpage²åÈë¶ÔÓ¦µÄslotÖĞ
+            // å°†åˆ†é…åˆ°çš„pageæ’å…¥å¯¹åº”çš„slotä¸­
             page->slab = shift;
             page->next = &slots[slot];
             page->prev = (uintptr_t) &slots[slot] | NGX_SLAB_SMALL;
 
             slots[slot].next = page;
 
-            // µÃµ½·ÖÅä³öÈ¥µÄchunkµØÖ·
+            // å¾—åˆ°åˆ†é…å‡ºå»çš„chunkåœ°å€
             p = ((page - pool->pages) << ngx_pagesize_shift) + s * n;
             p += (uintptr_t) pool->start;
 
@@ -683,10 +683,10 @@ ngx_slab_alloc_pages(ngx_slab_pool_t *pool, ngx_uint_t pages)
 
     for (page = pool->free.next; page != &pool->free; page = page->next) {
 
-        if (page->slab >= pages) {	 //page->slab±íÊ¾»¹ÓĞ¶àÉÙÄÚ´æÒ³¿ÉÊ¹ÓÃ
+        if (page->slab >= pages) {	 //page->slabè¡¨ç¤ºè¿˜æœ‰å¤šå°‘å†…å­˜é¡µå¯ä½¿ç”¨
 
-            if (page->slab > pages) { // Ò³ÄÚ´æ×ã¹»Ê¹ÓÃ
-                // ÇĞ¸î³öpages¿éÒ³ÄÚ´æ³öÀ´
+            if (page->slab > pages) { // é¡µå†…å­˜è¶³å¤Ÿä½¿ç”¨
+                // åˆ‡å‰²å‡ºpageså—é¡µå†…å­˜å‡ºæ¥
                 page[pages].slab = page->slab - pages;
                 page[pages].next = page->next;
                 page[pages].prev = page->prev;
@@ -708,7 +708,7 @@ ngx_slab_alloc_pages(ngx_slab_pool_t *pool, ngx_uint_t pages)
             if (--pages == 0) {
                 return page;
             }
-            // ÓàÏÂµÄÄÚ´æÒ³±ê×¢ÎªÕ¼ÓÃ
+            // ä½™ä¸‹çš„å†…å­˜é¡µæ ‡æ³¨ä¸ºå ç”¨
             for (p = page + 1; pages; pages--) {
                 p->slab = NGX_SLAB_PAGE_BUSY;
                 p->next = NULL;
@@ -733,17 +733,17 @@ ngx_slab_free_pages(ngx_slab_pool_t *pool, ngx_slab_page_t *page,
     ngx_slab_page_t  *prev;
 
     page->slab = pages--;
-    // ½«ºóÃæµÄpages-1¿éslabÇåÁã
+    // å°†åé¢çš„pages-1å—slabæ¸…é›¶
     if (pages) {
         ngx_memzero(&page[1], pages * sizeof(ngx_slab_page_t));
     }
-    // ½«page´ÓÔ­ÓĞµÄÁ´±íÉ¾³ı
+    // å°†pageä»åŸæœ‰çš„é“¾è¡¨åˆ é™¤
     if (page->next) {
         prev = (ngx_slab_page_t *) (page->prev & ~NGX_SLAB_PAGE_MASK);
         prev->next = page->next;
         page->next->prev = page->prev;
     }
-    // ¹é»¹µ½freeÁ´±í
+    // å½’è¿˜åˆ°freeé“¾è¡¨
     page->prev = (uintptr_t) &pool->free;
     page->next = pool->free.next;
 

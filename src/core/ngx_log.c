@@ -271,7 +271,7 @@ ngx_log_init(u_char *prefix)
     ngx_log.file = &ngx_log_file;
     ngx_log.log_level = NGX_LOG_NOTICE;
 
-    name = (u_char *) NGX_ERROR_LOG_PATH; // Ä¬ÈÏ
+    name = (u_char *) NGX_ERROR_LOG_PATH; // é»˜è®¤
 
     /*
      * we use ngx_strlen() here since BCC warns about
@@ -279,14 +279,14 @@ ngx_log_init(u_char *prefix)
      */
 
     nlen = ngx_strlen(name);
-	// Ã»ÓĞÉèÖÃÂ·¾¶µÄ»°Êä³öµ½stderr
+	// æ²¡æœ‰è®¾ç½®è·¯å¾„çš„è¯è¾“å‡ºåˆ°stderr
     if (nlen == 0) {
         ngx_log_file.fd = ngx_stderr;
         return &ngx_log;
     }
 
     p = NULL;
-	// ÈÕÖ¾Â·¾¶Îª¾ø¶ÔÂ·¾¶
+	// æ—¥å¿—è·¯å¾„ä¸ºç»å¯¹è·¯å¾„
 #if (NGX_WIN32)
     if (name[1] != ':') {
 #else
