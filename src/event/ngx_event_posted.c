@@ -9,18 +9,18 @@
 #include <ngx_core.h>
 #include <ngx_event.h>
 
-// ÅÐ¶ÏÓÐÎÞÊÂ¼þ´¦Àí£¬Ö»ÒªÅÐ¶ÏÏÂÃæµÄÁ½¸öÖ¸ÕëÊÇ·ñÎªNULL
+// åˆ¤æ–­æœ‰æ— äº‹ä»¶å¤„ç†ï¼Œåªè¦åˆ¤æ–­ä¸‹é¢çš„ä¸¤ä¸ªæŒ‡é’ˆæ˜¯å¦ä¸ºNULL
 
-// socket acceptÊÂ¼þ
+// socket acceptäº‹ä»¶
 ngx_thread_volatile ngx_event_t  *ngx_posted_accept_events;
-//socket ¶Á/Ð´ (·Ç¶àÏß³ÌÇé¿ö»¹»á´æ´¢¼ÆÊ±Æ÷ÊÂ¼þ)
+//socket è¯»/å†™ (éžå¤šçº¿ç¨‹æƒ…å†µè¿˜ä¼šå­˜å‚¨è®¡æ—¶å™¨äº‹ä»¶)
 ngx_thread_volatile ngx_event_t  *ngx_posted_events;
 
 #if (NGX_THREADS)
 ngx_mutex_t                      *ngx_posted_events_mutex;
 #endif
 
-// ±éÀúposted_eventÒ»´ÎÐÔ´¦ÀíËùÓÐÊÂ¼þ»Øµ÷
+// éåŽ†posted_eventä¸€æ¬¡æ€§å¤„ç†æ‰€æœ‰äº‹ä»¶å›žè°ƒ
 void
 ngx_event_process_posted(ngx_cycle_t *cycle,
     ngx_thread_volatile ngx_event_t **posted)
@@ -38,7 +38,7 @@ ngx_event_process_posted(ngx_cycle_t *cycle,
             return;
         }
 
-        ngx_delete_posted_event(ev); // *postedµÄÖµ»á±»¸Ä±ä
+        ngx_delete_posted_event(ev); // *postedçš„å€¼ä¼šè¢«æ”¹å˜
 
         ev->handler(ev);
     }

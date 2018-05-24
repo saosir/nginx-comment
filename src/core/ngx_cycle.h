@@ -35,7 +35,7 @@ struct ngx_shm_zone_s {
 
 
 struct ngx_cycle_s {
-	// ±£´æÃ¿¸ömoduleµÄconf
+	// ä¿å­˜æ¯ä¸ªmoduleçš„conf
     void                  ****conf_ctx;
     ngx_pool_t               *pool;
 
@@ -44,18 +44,18 @@ struct ngx_cycle_s {
 
     ngx_connection_t        **files;
     ngx_connection_t         *free_connections;
-    // Ê£ÓàµÄ¿ÕÏĞÁ¬½Ó
+    // å‰©ä½™çš„ç©ºé—²è¿æ¥
     ngx_uint_t                free_connection_n;
 
     ngx_queue_t               reusable_connections_queue;
-	//¼Ì³ĞµÄsocket
+	//ç»§æ‰¿çš„socket
     ngx_array_t               listening;
-	// »áÔÚngx_create_paths Öğ¸ö´´½¨Ä¿Â¼
+	// ä¼šåœ¨ngx_create_paths é€ä¸ªåˆ›å»ºç›®å½•
     ngx_array_t               paths;
-	// ÒÑ´ò¿ªÎÄ¼şÁĞ±í£¬ÔÚngx_init_cycleÖĞ±»³õÊ¼»¯
+	// å·²æ‰“å¼€æ–‡ä»¶åˆ—è¡¨ï¼Œåœ¨ngx_init_cycleä¸­è¢«åˆå§‹åŒ–
     ngx_list_t                open_files;
     ngx_list_t                shared_memory;
-    // ¿ÉÁ¬½ÓµÄ×ÜÊı    
+    // å¯è¿æ¥çš„æ€»æ•°    
     ngx_uint_t                connection_n;
     ngx_uint_t                files_n;
 
@@ -65,7 +65,7 @@ struct ngx_cycle_s {
 
     ngx_cycle_t              *old_cycle;
 
-	// ÅäÖÃÎÄ¼şÓëÄ¿Â¼£¬¿ÉÒÔ³ÉÎª¹¤×÷Ä¿Â¼
+	// é…ç½®æ–‡ä»¶ä¸ç›®å½•ï¼Œå¯ä»¥æˆä¸ºå·¥ä½œç›®å½•
     ngx_str_t                 conf_file;
     ngx_str_t                 conf_param;
     ngx_str_t                 conf_prefix;
@@ -82,7 +82,7 @@ typedef struct {
      ngx_flag_t               master;
 
      ngx_msec_t               timer_resolution;
-     // ¹¤×÷½ø³ÌµÄÊıÄ¿
+     // å·¥ä½œè¿›ç¨‹çš„æ•°ç›®
      ngx_int_t                worker_processes;
      ngx_int_t                debug_points;
 
@@ -101,7 +101,7 @@ typedef struct {
 
      ngx_str_t                working_directory;
      ngx_str_t                lock_file;
-     // pidÎÄ¼şÃû
+     // pidæ–‡ä»¶å
      ngx_str_t                pid;
      ngx_str_t                oldpid;
 

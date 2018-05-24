@@ -137,8 +137,8 @@ ngx_event_accept(ngx_event_t *ev)
 #if (NGX_STAT_STUB)
         (void) ngx_atomic_fetch_add(ngx_stat_accepted, 1);
 #endif
-        // ngx_cycle->free_connection_n ¿ÉÓÃÁ¬½ÓÊıĞ¡ÓÚ7/8£¬ngx_accept_disabled
-        // ÎªÕıÊı£¬²»È¥ÕùÇÀacceptËø
+        // ngx_cycle->free_connection_n å¯ç”¨è¿æ¥æ•°å°äº7/8ï¼Œngx_accept_disabled
+        // ä¸ºæ­£æ•°ï¼Œä¸å»äº‰æŠ¢accepté”
         ngx_accept_disabled = ngx_cycle->connection_n / 8
                               - ngx_cycle->free_connection_n;
 
@@ -390,7 +390,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
 
         return NGX_OK;
     }
-    // ÇÀacceptËøÊ§°Ü
+    // æŠ¢accepté”å¤±è´¥
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "accept mutex lock failed: %ui", ngx_accept_mutex_held);
 
@@ -405,7 +405,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-// ½«¼àÌısocket·Åµ½ÊÂ¼şÑ­»·ÖĞ
+// å°†ç›‘å¬socketæ”¾åˆ°äº‹ä»¶å¾ªç¯ä¸­
 static ngx_int_t
 ngx_enable_accept_events(ngx_cycle_t *cycle)
 {
@@ -438,7 +438,7 @@ ngx_enable_accept_events(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-// ¼àÌısocket´ÓÊÂ¼şÑ­»·ÖĞÉ¾³ı
+// ç›‘å¬socketä»äº‹ä»¶å¾ªç¯ä¸­åˆ é™¤
 static ngx_int_t
 ngx_disable_accept_events(ngx_cycle_t *cycle)
 {

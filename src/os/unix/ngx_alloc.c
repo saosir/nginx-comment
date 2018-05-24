@@ -10,7 +10,7 @@
 
 // 2^ngx_pagesize_shift = ngx_pagesize
 
-ngx_uint_t  ngx_pagesize; // 32λ 4k
+ngx_uint_t  ngx_pagesize; // 32Î» 4k
 ngx_uint_t  ngx_pagesize_shift; // 12  2^12=4k
 ngx_uint_t  ngx_cacheline_size;
 

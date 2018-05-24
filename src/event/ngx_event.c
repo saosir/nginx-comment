@@ -219,45 +219,45 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
 #endif
     }
-    // ¾ºÕùacceptËø£¬½ÓÊÕ¿Í»§¶Ë£¬ºÜ¶àÎÄÕÂ¶¼»á³¶µ½ÕâÀï
-    // ·ÀÖ¹¾ªÈºĞ§Ó¦£¬¾ÍÊÇ¶à¸ö½ø³Ìaccept£¬µ±ÓĞ¿Í»§Á¬½Ó
-    // Ê±ºò¶¼»á»½ĞÑËùÓĞµÄ½ø³Ì£¬µ«ÊÇÖ»ÓĞÒ»¸ö½ø³Ì¿ÉÒÔ
-    // µÃµ½Á¬½Ó£¬Õâ¸öÎÊÌâ»áÈÃcpuÕ¼ÓÃÂÊË²¼ä±ä¸ß
-    // ²Î¿¼http://blog.csdn.net/russell_tao/article/details/7204260 
+    // ç«äº‰accepté”ï¼Œæ¥æ”¶å®¢æˆ·ç«¯ï¼Œå¾ˆå¤šæ–‡ç« éƒ½ä¼šæ‰¯åˆ°è¿™é‡Œ
+    // é˜²æ­¢æƒŠç¾¤æ•ˆåº”ï¼Œå°±æ˜¯å¤šä¸ªè¿›ç¨‹acceptï¼Œå½“æœ‰å®¢æˆ·è¿æ¥
+    // æ—¶å€™éƒ½ä¼šå”¤é†’æ‰€æœ‰çš„è¿›ç¨‹ï¼Œä½†æ˜¯åªæœ‰ä¸€ä¸ªè¿›ç¨‹å¯ä»¥
+    // å¾—åˆ°è¿æ¥ï¼Œè¿™ä¸ªé—®é¢˜ä¼šè®©cpuå ç”¨ç‡ç¬é—´å˜é«˜
+    // å‚è€ƒhttp://blog.csdn.net/russell_tao/article/details/7204260 
     //             http://tengine.taobao.org/book/chapter_06.html#accept-40
 
-    //µ±nginx worker½ø³ÌÊı>1Ê±ÇÒÅäÖÃÎÄ¼şÖĞ´ò¿ªaccept_mutexÊ±£¬Õâ¸ö±êÖ¾ÖÃÎª1  
+    //å½“nginx workerè¿›ç¨‹æ•°>1æ—¶ä¸”é…ç½®æ–‡ä»¶ä¸­æ‰“å¼€accept_mutexæ—¶ï¼Œè¿™ä¸ªæ ‡å¿—ç½®ä¸º1  
     if (ngx_use_accept_mutex) {
-        //ngx_accept_disabled±íÊ¾´ËÊ±Âú¸ººÉ£¬Ã»±ØÒªÔÙ´¦ÀíĞÂÁ¬
-        //½ÓÁË£¬ÎÒÃÇÔÚnginx.confÔø¾­ÅäÖÃÁËÃ¿Ò»¸önginx worker½ø
-        //³ÌÄÜ¹»´¦ÀíµÄ×î´óÁ¬½ÓÊı£¬µ±´ïµ½×î´óÊıµÄ7/8Ê±£¬
-        //ngx_accept_disabledÎªÕı£¬ËµÃ÷±¾nginx worker½ø³Ì·Ç³£·±Ã¦£¬
-        //½«²»ÔÙÈ¥´¦ÀíĞÂÁ¬½Ó£¬ÕâÒ²ÊÇ¸ö¼òµ¥µÄ¸ºÔØ¾ùºâ
+        //ngx_accept_disabledè¡¨ç¤ºæ­¤æ—¶æ»¡è´Ÿè·ï¼Œæ²¡å¿…è¦å†å¤„ç†æ–°è¿
+        //æ¥äº†ï¼Œæˆ‘ä»¬åœ¨nginx.confæ›¾ç»é…ç½®äº†æ¯ä¸€ä¸ªnginx workerè¿›
+        //ç¨‹èƒ½å¤Ÿå¤„ç†çš„æœ€å¤§è¿æ¥æ•°ï¼Œå½“è¾¾åˆ°æœ€å¤§æ•°çš„7/8æ—¶ï¼Œ
+        //ngx_accept_disabledä¸ºæ­£ï¼Œè¯´æ˜æœ¬nginx workerè¿›ç¨‹éå¸¸ç¹å¿™ï¼Œ
+        //å°†ä¸å†å»å¤„ç†æ–°è¿æ¥ï¼Œè¿™ä¹Ÿæ˜¯ä¸ªç®€å•çš„è´Ÿè½½å‡è¡¡
         if (ngx_accept_disabled > 0) {
             ngx_accept_disabled--;
 
         } else {
-        //»ñµÃacceptËø£¬¶à¸öworker½öÓĞÒ»¸ö¿ÉÒÔµÃµ½Õâ°ÑËø¡£
-        //»ñµÃËø²»ÊÇ×èÈû¹ı³Ì£¬¶¼ÊÇÁ¢¿Ì·µ»Ø£¬»ñÈ¡³É¹¦
-        //µÄ»°ngx_accept_mutex_held±»ÖÃÎª1¡£ÄÃµ½Ëø£¬ÒâÎ¶×Å¼àÌı
-        //¾ä±ú±»·Åµ½±¾½ø³ÌµÄepollÖĞÁË£¬Èç¹ûÃ»ÓĞÄÃµ½Ëø£¬
-        //Ôò¼àÌı¾ä±ú»á±»´ÓepollÖĞÈ¡³ö¡£  
+        //è·å¾—accepté”ï¼Œå¤šä¸ªworkerä»…æœ‰ä¸€ä¸ªå¯ä»¥å¾—åˆ°è¿™æŠŠé”ã€‚
+        //è·å¾—é”ä¸æ˜¯é˜»å¡è¿‡ç¨‹ï¼Œéƒ½æ˜¯ç«‹åˆ»è¿”å›ï¼Œè·å–æˆåŠŸ
+        //çš„è¯ngx_accept_mutex_heldè¢«ç½®ä¸º1ã€‚æ‹¿åˆ°é”ï¼Œæ„å‘³ç€ç›‘å¬
+        //å¥æŸ„è¢«æ”¾åˆ°æœ¬è¿›ç¨‹çš„epollä¸­äº†ï¼Œå¦‚æœæ²¡æœ‰æ‹¿åˆ°é”ï¼Œ
+        //åˆ™ç›‘å¬å¥æŸ„ä¼šè¢«ä»epollä¸­å–å‡ºã€‚  
             if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
                 return;
             }
-            //ÄÃµ½ËøµÄ»°£¬ÖÃflagÎªNGX_POST_EVENTS£¬ÕâÒâÎ¶×Å
-            //ngx_process_eventsº¯ÊıÖĞ£¬ÈÎºÎÊÂ¼ş¶¼½«ÑÓºó´¦Àí£¬
-            //»á°ÑacceptÊÂ¼ş¶¼·Åµ½ngx_posted_accept_eventsÁ´±íÖĞ£¬
-            //epollin|epolloutÊÂ¼ş¶¼·Åµ½ngx_posted_eventsÁ´±íÖĞ  
+            //æ‹¿åˆ°é”çš„è¯ï¼Œç½®flagä¸ºNGX_POST_EVENTSï¼Œè¿™æ„å‘³ç€
+            //ngx_process_eventså‡½æ•°ä¸­ï¼Œä»»ä½•äº‹ä»¶éƒ½å°†å»¶åå¤„ç†ï¼Œ
+            //ä¼šæŠŠacceptäº‹ä»¶éƒ½æ”¾åˆ°ngx_posted_accept_eventsé“¾è¡¨ä¸­ï¼Œ
+            //epollin|epolloutäº‹ä»¶éƒ½æ”¾åˆ°ngx_posted_eventsé“¾è¡¨ä¸­  
 
             if (ngx_accept_mutex_held) {
                 flags |= NGX_POST_EVENTS;
 
             } else {
-            //ÄÃ²»µ½Ëø£¬Ò²¾Í²»»á´¦Àí¼àÌıµÄ¾ä±ú£¬Õâ¸ö
-            //timerÊµ¼ÊÊÇ´«¸øepoll_waitµÄ³¬Ê±Ê±¼ä£¬ĞŞ¸ÄÎª×î´ó
-            //ngx_accept_mutex_delayÒâÎ¶×Åepoll_wait¸ü¶ÌµÄ³¬Ê±·µ»Ø£¬
-            //ÒÔÃâĞÂÁ¬½Ó³¤Ê±¼äÃ»ÓĞµÃµ½´¦Àí  
+            //æ‹¿ä¸åˆ°é”ï¼Œä¹Ÿå°±ä¸ä¼šå¤„ç†ç›‘å¬çš„å¥æŸ„ï¼Œè¿™ä¸ª
+            //timerå®é™…æ˜¯ä¼ ç»™epoll_waitçš„è¶…æ—¶æ—¶é—´ï¼Œä¿®æ”¹ä¸ºæœ€å¤§
+            //ngx_accept_mutex_delayæ„å‘³ç€epoll_waitæ›´çŸ­çš„è¶…æ—¶è¿”å›ï¼Œ
+            //ä»¥å…æ–°è¿æ¥é•¿æ—¶é—´æ²¡æœ‰å¾—åˆ°å¤„ç†  
                 if (timer == NGX_TIMER_INFINITE
                     || timer > ngx_accept_mutex_delay)
                 {
@@ -275,26 +275,26 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "timer delta: %M", delta);
-    //Èç¹ûngx_posted_accept_eventsÁ´±íÓĞÊı¾İ£¬¾Í¿ªÊ¼accept½¨Á¢ĞÂÁ¬½Ó
+    //å¦‚æœngx_posted_accept_eventsé“¾è¡¨æœ‰æ•°æ®ï¼Œå°±å¼€å§‹acceptå»ºç«‹æ–°è¿æ¥
     if (ngx_posted_accept_events) {
-        //ngx_posted_accept_eventsÖ¸ÕëµÄÖµ»á±»¸üĞÂ
+        //ngx_posted_accept_eventsæŒ‡é’ˆçš„å€¼ä¼šè¢«æ›´æ–°
         ngx_event_process_posted(cycle, &ngx_posted_accept_events);
     }
-    //ÊÍ·ÅËøºóÔÙ´¦ÀíÏÂÃæµÄEPOLLIN¡¢ EPOLLOUTÇëÇó  
+    //é‡Šæ”¾é”åå†å¤„ç†ä¸‹é¢çš„EPOLLINã€ EPOLLOUTè¯·æ±‚  
     if (ngx_accept_mutex_held) {
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }
 
-    // delta²»Îª0ËµÃ÷Ê±¼äÓĞ×ß¶¯£¬¼ì²éÊ±ºòÓĞ¼ÆÊ±Æ÷³¬Ê±
+    // deltaä¸ä¸º0è¯´æ˜æ—¶é—´æœ‰èµ°åŠ¨ï¼Œæ£€æŸ¥æ—¶å€™æœ‰è®¡æ—¶å™¨è¶…æ—¶
     if (delta) {
         ngx_event_expire_timers();
     }
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "posted events %p", ngx_posted_events);
-    //È»ºóÔÙ´¦ÀíÕı³£µÄÊı¾İ¶ÁĞ´ÇëÇó¡£ÒòÎªÕâĞ©ÇëÇóºÄ
-    //Ê±¾Ã£¬ËùÒÔÔÚngx_process_eventsÀïNGX_POST_EVENTS±êÖ¾½«ÊÂ¼ş
-    //¶¼·ÅÈëngx_posted_eventsÁ´±íÖĞ£¬ÑÓ³Ùµ½ËøÊÍ·ÅÁËÔÙ´¦Àí¡£  
+    //ç„¶åå†å¤„ç†æ­£å¸¸çš„æ•°æ®è¯»å†™è¯·æ±‚ã€‚å› ä¸ºè¿™äº›è¯·æ±‚è€—
+    //æ—¶ä¹…ï¼Œæ‰€ä»¥åœ¨ngx_process_eventsé‡ŒNGX_POST_EVENTSæ ‡å¿—å°†äº‹ä»¶
+    //éƒ½æ”¾å…¥ngx_posted_eventsé“¾è¡¨ä¸­ï¼Œå»¶è¿Ÿåˆ°é”é‡Šæ”¾äº†å†å¤„ç†ã€‚  
     if (ngx_posted_events) {
         if (ngx_threaded) {
             ngx_wakeup_worker_thread(cycle);

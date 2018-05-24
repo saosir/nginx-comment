@@ -22,7 +22,7 @@
 
 
 #if (NGX_HAVE_FIONBIO)
-// 设置socket非阻塞
+// 脡猫脰脙socket路脟脳猫脠没
 int
 ngx_nonblocking(ngx_socket_t s)
 {
@@ -33,7 +33,7 @@ ngx_nonblocking(ngx_socket_t s)
     return ioctl(s, FIONBIO, &nb);
 }
 
-// 设置socket阻塞
+// 脡猫脰脙socket脳猫脠没
 int
 ngx_blocking(ngx_socket_t s)
 {

@@ -323,7 +323,7 @@ ngx_epoll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
             return NGX_ERROR;
         }
     }
-    // ×î´ó¼àÌýÊýÄ¿    
+    // æœ€å¤§ç›‘å¬æ•°ç›®    
     nevents = epcf->events;
 
     ngx_io = ngx_os_io;
@@ -386,19 +386,19 @@ ngx_epoll_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     int                  op;
     uint32_t             events, prev;
     ngx_event_t         *e;
-    ngx_connection_t    *c; // ¶ÔÁ¢ÊÂ¼þ
+    ngx_connection_t    *c; // å¯¹ç«‹äº‹ä»¶
     struct epoll_event   ee;
 
     c = ev->data;
 
     events = (uint32_t) event;
-    // Ìí¼Ó¶ÁÊÂ¼þ£¬Èç¹ûÐ´ÊÂ¼þ´¦ÓÚactive£¬ÄÇÃ´×îºó
-    // epoll_ctlÖ®ºófd»ámod ÎªEPOLLIN|EPOLLOUT£¬Èç¹ûÐ´ÊÂ¼þ²»´¦ÓÚ
-    // active£¬ÄÇÃ´¾Íadd EPOLLIN
+    // æ·»åŠ è¯»äº‹ä»¶ï¼Œå¦‚æžœå†™äº‹ä»¶å¤„äºŽactiveï¼Œé‚£ä¹ˆæœ€åŽ
+    // epoll_ctlä¹‹åŽfdä¼šmod ä¸ºEPOLLIN|EPOLLOUTï¼Œå¦‚æžœå†™äº‹ä»¶ä¸å¤„äºŽ
+    // activeï¼Œé‚£ä¹ˆå°±add EPOLLIN
     if (event == NGX_READ_EVENT) {
         e = c->write;
         prev = EPOLLOUT;
-#if (NGX_READ_EVENT != EPOLLIN) // ºöÂÔ´Ëºê
+#if (NGX_READ_EVENT != EPOLLIN) // å¿½ç•¥æ­¤å®
         events = EPOLLIN;
 #endif
 
@@ -575,12 +575,12 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "epoll timer: %M", timer);
-    // epollµÈ´ýÊÂ¼þ
+    // epollç­‰å¾…äº‹ä»¶
     events = epoll_wait(ep, event_list, (int) nevents, timer);
 
     err = (events == -1) ? ngx_errno : 0;
 
-    // ¸üÐÂÊ±¼ä
+    // æ›´æ–°æ—¶é—´
     if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm) {
         ngx_time_update();
     }
@@ -607,7 +607,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
         if (timer != NGX_TIMER_INFINITE) {
             return NGX_OK;
         }
-        // ÔÚtimerÎª-1ÔÚÃ»ÓÐÊÂ¼þµÄÇé¿öÏÂepoll_wait·µ»Ø
+        // åœ¨timerä¸º-1åœ¨æ²¡æœ‰äº‹ä»¶çš„æƒ…å†µä¸‹epoll_waitè¿”å›ž
         ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                       "epoll_wait() returned no events without timeout");
         return NGX_ERROR;
@@ -675,8 +675,8 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             } else {
                 rev->ready = 1;
             }
-            // ÓÐNGX_POST_EVENTS±êÖ¾µÄ»°£¬¼àÌýsocketºÍ¶Á/Ð´·Ö¿ª´¦Àí
-            // ÓÅÏÈ´¦Àí¼àÌýsocket
+            // æœ‰NGX_POST_EVENTSæ ‡å¿—çš„è¯ï¼Œç›‘å¬socketå’Œè¯»/å†™åˆ†å¼€å¤„ç†
+            // ä¼˜å…ˆå¤„ç†ç›‘å¬socket
             if (flags & NGX_POST_EVENTS) {
                 queue = (ngx_event_t **) (rev->accept ?
                                &ngx_posted_accept_events : &ngx_posted_events);
@@ -684,7 +684,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
                 ngx_locked_post_event(rev, queue);
 
             } else {
-                // ·ñÔòÕâÀïÖ±½Ó¾Í»Øµ÷ÊÂ¼þ´¦Àí
+                // å¦åˆ™è¿™é‡Œç›´æŽ¥å°±å›žè°ƒäº‹ä»¶å¤„ç†
                 rev->handler(rev);
             }
         }
@@ -834,7 +834,7 @@ static char *
 ngx_epoll_init_conf(ngx_cycle_t *cycle, void *conf)
 {
     ngx_epoll_conf_t *epcf = conf;
-    // ¼àÌý512¸ösocket
+    // ç›‘å¬512ä¸ªsocket
     ngx_conf_init_uint_value(epcf->events, 512);
     ngx_conf_init_uint_value(epcf->aio_requests, 32);
 

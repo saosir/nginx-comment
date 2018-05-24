@@ -130,7 +130,7 @@ struct ngx_event_s {
     ngx_uint_t       index;
 
     ngx_log_t       *log;
-    // ºìºÚÊ÷×÷Îª¼ÆÊ±Æ÷£¬libeventÊ¹ÓÃµÄÊÇ¶ş²æ¶Ñ 
+    // çº¢é»‘æ ‘ä½œä¸ºè®¡æ—¶å™¨ï¼Œlibeventä½¿ç”¨çš„æ˜¯äºŒå‰å † 
     ngx_rbtree_node_t   timer;
 
     unsigned         closed:1;
@@ -165,7 +165,7 @@ struct ngx_event_s {
 
     /* the links of the posted queue */
     ngx_event_t     *next;
-    // Ö¸ÕëµÄÖ¸Õë
+    // æŒ‡é’ˆçš„æŒ‡é’ˆ
     ngx_event_t    **prev;
 
 
@@ -482,7 +482,7 @@ typedef struct {
 #endif
 } ngx_event_conf_t;
 
-// Ç°3¸ö×Ö¶ÎÓëngx_core_module_tÒ»Ñù
+// å‰3ä¸ªå­—æ®µä¸ngx_core_module_tä¸€æ ·
 typedef struct {
     ngx_str_t              *name;
 

@@ -22,20 +22,20 @@ typedef void (*ngx_spawn_proc_pt) (ngx_cycle_t *cycle, void *data);
 typedef struct {
     ngx_pid_t           pid;
     int                 status;
-    // socketpair£¬ÓÃÓÚÍ¨ĞÅ
+    // socketpairï¼Œç”¨äºé€šä¿¡
     ngx_socket_t        channel[2];
-    // º¯Êı
+    // å‡½æ•°
     ngx_spawn_proc_pt   proc;
     void               *data;
     char               *name;
 
     unsigned            respawn:1;
     unsigned            just_spawn:1;
-    // ÊÇ·ñÓë¸¸½ø³Ì·ÖÀë
+    // æ˜¯å¦ä¸çˆ¶è¿›ç¨‹åˆ†ç¦»
     unsigned            detached:1;
-    // ÕıÔÚÍË³ö
+    // æ­£åœ¨é€€å‡º
     unsigned            exiting:1;
-    // ÊÇ·ñÒÑ¾­ÍË³ö
+    // æ˜¯å¦å·²ç»é€€å‡º
     unsigned            exited:1;
 } ngx_process_t;
 
