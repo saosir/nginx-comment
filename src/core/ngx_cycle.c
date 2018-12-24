@@ -24,7 +24,7 @@ ngx_array_t            ngx_old_cycles;
 static ngx_pool_t     *ngx_temp_pool;
 static ngx_event_t     ngx_cleaner_event;
 
-ngx_uint_t             ngx_test_config;
+ngx_uint_t             ngx_test_config; // -t 命令检测配置是否正确
 ngx_uint_t             ngx_quiet_mode;
 
 #if (NGX_THREADS)
@@ -214,11 +214,12 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 	// 每个module调用create_conf，并将返回的结果保存到cycle->conf_ctx
     for (i = 0; ngx_modules[i]; i++) {
+        // 只使用 core module
         if (ngx_modules[i]->type != NGX_CORE_MODULE) {
             continue;
         }
 
-        module = ngx_modules[i]->ctx;
+        module = ngx_modules[i]->ctx; // 不同模块的ctx可能不一样，但是类型为NGX_CORE_MODULE的模块前三个字段和ngx_core_module_t一样
 
         if (module->create_conf) {
             rv = module->create_conf(cycle);
@@ -259,13 +260,13 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #if 0
     log->log_level = NGX_LOG_DEBUG_ALL;
 #endif
-
+    // 命令行-g参数可以手动数据配置项
     if (ngx_conf_param(&conf) != NGX_CONF_OK) {
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
-
+    // 解析配置文件 nginx.conf
     if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
@@ -577,7 +578,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_open_listening_sockets(cycle) != NGX_OK) {
         goto failed;
     }
-	// 初始化配置 listen socket
+	// 根据配置设置 listen socket 的选项setsockopt
     if (!ngx_test_config) {
         ngx_configure_listening_sockets(cycle);
     }
@@ -785,7 +786,7 @@ old_shm_zone_done:
 
 
 failed:
-
+    // 失败回滚
     if (!ngx_is_init_cycle(old_cycle)) {
         old_ccf = (ngx_core_conf_t *) ngx_get_conf(old_cycle->conf_ctx,
                                                    ngx_core_module);
@@ -1046,7 +1047,7 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
     ngx_memzero(&file, sizeof(ngx_file_t));
-
+    // 从pid文件读取进程号
     file.name = ccf->pid;
     file.log = cycle->log;
 
@@ -1080,7 +1081,7 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
                       n, buf, file.name.data);
         return 1;
     }
-
+    // 发送信号
     return ngx_os_signal_process(cycle, sig, pid);
 
 }

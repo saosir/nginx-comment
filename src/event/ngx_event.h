@@ -40,7 +40,7 @@ struct ngx_event_s {
 
     unsigned         write:1;
 
-    unsigned         accept:1;
+    unsigned         accept:1; // 监听socket，用于accept
 
     /* used to detect the stale events in kqueue, rtsig, and epoll */
     unsigned         instance:1;

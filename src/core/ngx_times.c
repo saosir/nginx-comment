@@ -99,7 +99,7 @@ ngx_time_update(void)
         ngx_unlock(&ngx_time_lock);
         return;
     }
-	// 回滚slot &= NGX_TIME_SLOTS - 1
+	// 数据轮询 回滚slot &= NGX_TIME_SLOTS - 1
     if (slot == NGX_TIME_SLOTS - 1) {
         slot = 0;
     } else {

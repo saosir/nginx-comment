@@ -58,7 +58,7 @@ static ngx_uint_t argument_number[] = {
     NGX_CONF_TAKE7
 };
 
-
+// 解析文本配置
 char *
 ngx_conf_param(ngx_conf_t *cf)
 {
@@ -86,7 +86,7 @@ ngx_conf_param(ngx_conf_t *cf)
     conf_file.file.fd = NGX_INVALID_FILE;
     conf_file.file.name.data = NULL;
     conf_file.line = 0;
-
+    // 临时设置
     cf->conf_file = &conf_file;
     cf->conf_file->buffer = &b;
 
@@ -97,7 +97,7 @@ ngx_conf_param(ngx_conf_t *cf)
     return rv;
 }
 
-
+// 解析配置文件
 char *
 ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
 {
@@ -128,7 +128,7 @@ ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
                                filename->data);
             return NGX_CONF_ERROR;
         }
-
+        // 临时保存后面还原
         prev = cf->conf_file;
 
         cf->conf_file = &conf_file;
@@ -275,7 +275,7 @@ done:
     return NGX_CONF_OK;
 }
 
-
+// 处理读取到的配置块或者配置项，module中如果支持对应的命令会回调通知
 static ngx_int_t
 ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 {
@@ -335,7 +335,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
             }
 
             /* is the directive's argument count right ? */
-
+            // 确认指令的参数个数是否正确
             if (!(cmd->type & NGX_CONF_ANY)) {
 
                 if (cmd->type & NGX_CONF_FLAG) {
@@ -374,7 +374,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
                 conf = ((void **) cf->ctx)[ngx_modules[i]->index];
 
             } else if (cmd->type & NGX_MAIN_CONF) {
-                conf = &(((void **) cf->ctx)[ngx_modules[i]->index]);
+                conf = &(((void **) cf->ctx)[ngx_modules[i]->index]); // 有可能会被修改
 
             } else if (cf->ctx) {
                 confp = *(void **) ((char *) cf->ctx + cmd->conf);
@@ -426,7 +426,7 @@ invalid:
 static ngx_int_t
 ngx_conf_read_token(ngx_conf_t *cf)
 {
-    u_char      *start, ch, *src, *dst;
+    u_char      *start/*字符串参数起始*/, ch, *src, *dst;
     off_t        file_size;
     size_t       len;
     ssize_t      n, size;
@@ -452,9 +452,10 @@ ngx_conf_read_token(ngx_conf_t *cf)
     file_size = ngx_file_size(&cf->conf_file->file.info);
 
     for ( ;; ) {
-
+        // 缓存区为空，需要读文件内容
         if (b->pos >= b->last) {
 
+            // 文件已经读取完毕
             if (cf->conf_file->file.offset >= file_size) {
 
                 if (cf->args->nelts > 0 || !last_space) {
@@ -476,7 +477,7 @@ ngx_conf_read_token(ngx_conf_t *cf)
             }
 
             len = b->pos - start;
-
+  
             if (len == NGX_CONF_BUFFER) {
                 cf->conf_file->line = start_line;
 
@@ -498,14 +499,14 @@ ngx_conf_read_token(ngx_conf_t *cf)
                                    "missing terminating \"%c\" character", ch);
                 return NGX_ERROR;
             }
-
+            // 有可能正在读取字符串参数，后面一半的字符串在文件中
             if (len) {
-                ngx_memmove(b->start, start, len);
+                ngx_memmove(b->start, start, len); // 先把缓存复制到b->star，剩余部分从文件中读取到 b->star + len
             }
 
-            size = (ssize_t) (file_size - cf->conf_file->file.offset);
+            size = (ssize_t) (file_size - cf->conf_file->file.offset);//文件内容剩余读取大小
 
-            if (size > b->end - (b->start + len)) {
+            if (size > b->end - (b->start + len)) {// 大于缓冲区可用大小，将size调整为剩余缓冲区大小
                 size = b->end - (b->start + len);
             }
 
@@ -528,12 +529,12 @@ ngx_conf_read_token(ngx_conf_t *cf)
             b->last = b->pos + n;
             start = b->start;
         }
-
+        // 一个一个字节读取
         ch = *b->pos++;
 
         if (ch == LF) {
             cf->conf_file->line++;
-
+            // 遇到换行，注释结束
             if (sharp_comment) {
                 sharp_comment = 0;
             }
@@ -1032,7 +1033,7 @@ ngx_conf_log_error(ngx_uint_t level, ngx_conf_t *cf, ngx_err_t err,
                   cf->conf_file->file.name.data, cf->conf_file->line);
 }
 
-
+// 设置变量开关如 daemon on
 char *
 ngx_conf_set_flag_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -1042,7 +1043,7 @@ ngx_conf_set_flag_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_flag_t       *fp;
     ngx_conf_post_t  *post;
 
-    fp = (ngx_flag_t *) (p + cmd->offset);
+    fp = (ngx_flag_t *) (p + cmd->offset); // 指向设置的变量
 
     if (*fp != NGX_CONF_UNSET) {
         return "is duplicate";

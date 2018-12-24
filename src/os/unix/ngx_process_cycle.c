@@ -32,7 +32,7 @@ static void ngx_cache_manager_process_handler(ngx_event_t *ev);
 static void ngx_cache_loader_process_handler(ngx_event_t *ev);
 
 
-ngx_uint_t    ngx_process;
+ngx_uint_t    ngx_process; // 进程模式
 // 进程pid
 ngx_pid_t     ngx_pid;
 ngx_uint_t    ngx_threaded;
@@ -41,10 +41,10 @@ sig_atomic_t  ngx_reap;
 sig_atomic_t  ngx_sigio;
 sig_atomic_t  ngx_sigalrm;
 sig_atomic_t  ngx_terminate;
-sig_atomic_t  ngx_quit;
+sig_atomic_t  ngx_quit; // 需要关闭退出nginx
 sig_atomic_t  ngx_debug_quit;
 ngx_uint_t    ngx_exiting;
-sig_atomic_t  ngx_reconfigure;
+sig_atomic_t  ngx_reconfigure; // 需要重新加载配置
 sig_atomic_t  ngx_reopen;
 
 sig_atomic_t  ngx_change_binary;
@@ -54,7 +54,7 @@ ngx_uint_t    ngx_daemonized;
 
 sig_atomic_t  ngx_noaccept;
 ngx_uint_t    ngx_noaccepting;
-ngx_uint_t    ngx_restart;
+ngx_uint_t    ngx_restart; // 需要进行重启
 
 
 #if (NGX_THREADS)
@@ -126,7 +126,8 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
     sigemptyset(&set);
 
-    // 设置进程标题
+    // 主进程标题 master /usr/local/nginx/sbin/nginx
+
     size = sizeof(master_process);
 
     for (i = 0; i < ngx_argc; i++) {
@@ -134,7 +135,6 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     }
 
     title = ngx_pnalloc(cycle->pool, size);
-
     p = ngx_cpymem(title, master_process, sizeof(master_process) - 1);
     for (i = 0; i < ngx_argc; i++) {
         *p++ = ' ';
@@ -160,7 +160,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     delay = 0;
     sigio = 0;
     live = 1;
-    // 进入事件循环
+    // master进入事件循环
     for ( ;; ) {
         if (delay) {
             //超时信号，指数增长睡眠时间
@@ -242,7 +242,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
             continue;
         }
-
+        // 重新加载配置
         if (ngx_reconfigure) {
             ngx_reconfigure = 0;
 
@@ -540,7 +540,7 @@ ngx_signal_worker_processes(ngx_cycle_t *cycle, int signo)
         {
             continue;
         }
-
+        // 发送命令给子进程
         if (ch.command) {
             if (ngx_write_channel(ngx_processes[i].channel[0],
                                   &ch, sizeof(ngx_channel_t), cycle->log)
@@ -742,7 +742,7 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
     exit(0);
 }
 
-// fork子进程创建的时候，执行此函数
+// fork之后，worker进程执行此函数进入循环
 static void
 ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {

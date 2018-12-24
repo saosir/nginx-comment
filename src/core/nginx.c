@@ -191,8 +191,8 @@ static ngx_uint_t   ngx_show_version;
 static ngx_uint_t   ngx_show_configure;
 static u_char      *ngx_prefix;
 static u_char      *ngx_conf_file;
-static u_char      *ngx_conf_params;
-static char        *ngx_signal;
+static u_char      *ngx_conf_params; // 命令行 -g 参数设置全局配置
+static char        *ngx_signal; // 命令行 -s 发送信号
 
 
 static char **ngx_os_environ;
@@ -327,7 +327,7 @@ main(int argc, char *const *argv)
         return 1;
     }
 
-    // 统一分配下标
+    // 为每个模块分配下标
     ngx_max_module = 0;
     for (i = 0; ngx_modules[i]; i++) {
         ngx_modules[i]->index = ngx_max_module++;
@@ -351,7 +351,7 @@ main(int argc, char *const *argv)
 
         return 0;
     }
-
+    // 发送信号
     if (ngx_signal) {
         return ngx_signal_process(cycle, ngx_signal);
     }
@@ -360,6 +360,7 @@ main(int argc, char *const *argv)
 
     ngx_cycle = cycle;
 
+    // 得到core模块的配置
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
     if (ccf->master && ngx_process == NGX_PROCESS_SINGLE) {
@@ -367,7 +368,7 @@ main(int argc, char *const *argv)
     }
 
 #if !(NGX_WIN32)
-    // 信号处理初始化
+    // 信号处理初始化，如reload/quit
     if (ngx_init_signals(cycle->log) != NGX_OK) {
         return 1;
     }
@@ -667,6 +668,7 @@ ngx_exec_new_binary(ngx_cycle_t *cycle, char *const *argv)
 }
 
 
+// 命令行解析
 static ngx_int_t
 ngx_get_options(int argc, char *const *argv)
 {

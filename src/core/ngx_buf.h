@@ -20,11 +20,11 @@ typedef struct ngx_buf_s  ngx_buf_t;
 struct ngx_buf_with_comment_s {
     /*
      * pos通常是用来告诉使用者本次应该从pos这个位置开始处理内存中的数据，这样设置是因为同一个
-     * ngx_buf_t可能被多次反复处理。当然，pos的含义是由使用它的模板定义的
+     * ngx_buf_t可能被多次反复处理。
      */
     u_char  *pos;
                                
-    /* last通常表示有效的内容到此为止，注意，pos与last之间的内存是希望nginx处理的内容 */
+    /* last表示有效的内容结尾，pos与last之间的内存是希望nginx处理的内容 */
     u_char  *last;
                                
     /*
@@ -34,7 +34,7 @@ struct ngx_buf_with_comment_s {
     off_t   file_pos;
     off_t   file_last;
                                
-    /* 如果ngx_buf_t缓冲区用于内存，那么start指向这段内存的起始地址 */
+    /* 如果ngx_buf_t缓冲区用于内存，那么start指向这段内存的起始地，start    <=pos              */
     u_char  *start;
                                
     /* 与start成员对应，指向缓冲区内存的末尾 */
@@ -157,8 +157,8 @@ temp_file:	由于受到内存使用的限制，有时候一些buf的内容需要
 */
 struct ngx_buf_s {
 	// start <= pos <= last <= end
-    u_char          *pos;
-    u_char          *last;
+    u_char          *pos; // 读取到的位置
+    u_char          *last; // 可用缓存的末尾
     off_t            file_pos;
     off_t            file_last;
 

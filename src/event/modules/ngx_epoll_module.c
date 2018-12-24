@@ -620,7 +620,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 
         instance = (uintptr_t) c & 1;
         c = (ngx_connection_t *) ((uintptr_t) c & (uintptr_t) ~1);
-
+        // 处理读事件
         rev = c->read;
 
         if (c->fd == -1 || rev->instance != instance) {
@@ -675,8 +675,8 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             } else {
                 rev->ready = 1;
             }
-            // 有NGX_POST_EVENTS标志的话，监听socket和读/写分开处理
-            // 优先处理监听socket
+            // 有NGX_POST_EVENTS标志的话，将事件放到post链表尽心处理，监听socket和读/写分开处理
+            // 优先处理listen socket
             if (flags & NGX_POST_EVENTS) {
                 queue = (ngx_event_t **) (rev->accept ?
                                &ngx_posted_accept_events : &ngx_posted_events);
@@ -689,6 +689,7 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             }
         }
 
+        // 处理写事件
         wev = c->write;
 
         if ((revents & EPOLLOUT) && wev->active) {

@@ -264,7 +264,7 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+// 创建socket并开始监听
 ngx_int_t
 ngx_open_listening_sockets(ngx_cycle_t *cycle)
 {
@@ -770,7 +770,7 @@ ngx_get_connection(ngx_socket_t s, ngx_log_t *log)
     }
 
     /* ngx_mutex_lock */
-
+    // 空闲链表获取一个节点
     c = ngx_cycle->free_connections;
 
     if (c == NULL) {
@@ -788,7 +788,7 @@ ngx_get_connection(ngx_socket_t s, ngx_log_t *log)
         return NULL;
     }
 
-    ngx_cycle->free_connections = c->data;
+    ngx_cycle->free_connections = c->data; // 指向下一个
     ngx_cycle->free_connection_n--;
 
     /* ngx_mutex_unlock */

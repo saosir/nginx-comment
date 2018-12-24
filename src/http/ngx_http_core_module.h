@@ -148,7 +148,7 @@ typedef struct {
 
 
 typedef struct {
-    ngx_array_t                servers;         /* ngx_http_core_srv_conf_t */
+    ngx_array_t                servers;         /* ngx_http_core_srv_conf_t http.server指令*/
 
     ngx_http_phase_engine_t    phase_engine;
 
@@ -167,7 +167,7 @@ typedef struct {
 
     ngx_hash_keys_arrays_t    *variables_keys;
 
-    ngx_array_t               *ports;
+    ngx_array_t               *ports; // 监听的地址端口
 
     ngx_uint_t                 try_files;       /* unsigned  try_files:1 */
 

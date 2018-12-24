@@ -109,7 +109,7 @@ struct ngx_open_file_s {
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
 
 struct ngx_module_s {
-    ngx_uint_t            ctx_index;
+    ngx_uint_t            ctx_index; // 二级模块下标
 	// main函数中，在ngx_init_cycle调用之前会统一分配下标
 	// 表示在cycle->conf_ctx的下标ngx_get_conf(cycle->conf_ctx, ngx_core_module)
     ngx_uint_t            index;
@@ -121,8 +121,7 @@ struct ngx_module_s {
 
     ngx_uint_t            version;
 
-    // 不同模块会有不同context，
-    // 如ngx_epoll_module的ctx为ngx_event_module_t ngx_epoll_module_ctx
+    // 不同模块会有不同context，core module前三个字段和ngx_core_module_t一样有name/create_conf/init_conf三个字段
     void                 *ctx;
     ngx_command_t        *commands;
     ngx_uint_t            type;
@@ -130,8 +129,8 @@ struct ngx_module_s {
     ngx_int_t           (*init_master)(ngx_log_t *log);
 
     ngx_int_t           (*init_module)(ngx_cycle_t *cycle);
-
-    ngx_int_t           (*init_process)(ngx_cycle_t *cycle);
+    // 子进程启动之前调用 ngx_worker_process_init/ngx_single_process_cycle
+    ngx_int_t           (*init_process)(ngx_cycle_t *cycle); 
     ngx_int_t           (*init_thread)(ngx_cycle_t *cycle);
     void                (*exit_thread)(ngx_cycle_t *cycle);
     void                (*exit_process)(ngx_cycle_t *cycle);
@@ -159,7 +158,7 @@ typedef struct {
 typedef struct {
     ngx_file_t            file;
     ngx_buf_t            *buffer;
-    ngx_uint_t            line;
+    ngx_uint_t            line; // 读取到配置文件第几行
 } ngx_conf_file_t;
 
 
@@ -177,7 +176,7 @@ struct ngx_conf_s {
     ngx_conf_file_t      *conf_file;
     ngx_log_t            *log;
 
-    void                 *ctx;
+    void                 *ctx; // 每个模块初始化时候返回
     ngx_uint_t            module_type;
     ngx_uint_t            cmd_type;
 

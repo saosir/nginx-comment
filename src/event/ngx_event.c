@@ -42,7 +42,7 @@ sig_atomic_t          ngx_event_timer_alarm;
 static ngx_uint_t     ngx_event_max_module;
 
 ngx_uint_t            ngx_event_flags;
-ngx_event_actions_t   ngx_event_actions;
+ngx_event_actions_t   ngx_event_actions; // 在event模块与os相关的io模型模块中的init函数中初始化，如ngx_epoll_module模块的ngx_epoll_init函数
 
 
 static ngx_atomic_t   connection_counter = 1;
@@ -228,19 +228,18 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
     //当nginx worker进程数>1时且配置文件中打开accept_mutex时，这个标志置为1  
     if (ngx_use_accept_mutex) {
-        //ngx_accept_disabled表示此时满负荷，没必要再处理新连
-        //接了，我们在nginx.conf曾经配置了每一个nginx worker进
-        //程能够处理的最大连接数，当达到最大数的7/8时，
-        //ngx_accept_disabled为正，说明本nginx worker进程非常繁忙，
-        //将不再去处理新连接，这也是个简单的负载均衡
+        // ngx_accept_disabled>0时表示满负荷，没必要再处理新连
+        // 在nginx.conf配置nginx worker进程能够处理的最大连接数worker_connections，
+        // 当达到最大数的7/8时，ngx_accept_disabled为正，说明本nginx worker进程非常繁忙，
+        // 将不再去处理新连接
         if (ngx_accept_disabled > 0) {
             ngx_accept_disabled--;
 
         } else {
-        //获得accept锁，多个worker仅有一个可以得到这把锁。
-        //获得锁不是阻塞过程，都是立刻返回，获取成功
-        //的话ngx_accept_mutex_held被置为1。拿到锁，意味着监听
-        //句柄被放到本进程的epoll中了，如果没有拿到锁，
+        //竞争accept锁，多个worker仅有一个可以得到这把锁。
+        //竞争锁不会阻塞进程而是立刻返回，获取成功
+        //的话ngx_accept_mutex_held被置为1。拿到锁意味着监听
+        //句柄被放到本进程的epoll中，如果没有拿到锁，
         //则监听句柄会被从epoll中取出。  
             if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
                 return;
@@ -254,7 +253,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
                 flags |= NGX_POST_EVENTS;
 
             } else {
-            //拿不到锁，也就不会处理监听的句柄，这个
+            //拿不到锁也就不会处理监听的句柄，这个
             //timer实际是传给epoll_wait的超时时间，修改为最大
             //ngx_accept_mutex_delay意味着epoll_wait更短的超时返回，
             //以免新连接长时间没有得到处理  
@@ -750,7 +749,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 
     i = cycle->connection_n;
     next = NULL;
-
+    // 串联为链表保存于free_connections
     do {
         i--;
 

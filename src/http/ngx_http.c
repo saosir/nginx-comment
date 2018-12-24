@@ -126,7 +126,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_core_loc_conf_t    *clcf;
     ngx_http_core_srv_conf_t   **cscfp;
     ngx_http_core_main_conf_t   *cmcf;
-
+    // 疑问如果配置中有多个http块会不会内存泄漏？
     /* the main http context */
 
     ctx = ngx_pcalloc(cf->pool, sizeof(ngx_http_conf_ctx_t));
@@ -134,7 +134,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-    *(ngx_http_conf_ctx_t **) conf = ctx;
+    *(ngx_http_conf_ctx_t **) conf = ctx; // 保存指针，指向 cycle->conf_ctx 数组变量
 
 
     /* count the number of the http modules and set up their indices */
@@ -184,12 +184,12 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      * create the main_conf's, the null srv_conf's, and the null loc_conf's
      * of the all http modules
      */
-
+    // http模块会core类型模块，会将所有类型NGX_HTTP_MODULE的http子模块进行初始化
     for (m = 0; ngx_modules[m]; m++) {
         if (ngx_modules[m]->type != NGX_HTTP_MODULE) {
             continue;
         }
-
+        // 调用每个http子模块初始函数
         module = ngx_modules[m]->ctx;
         mi = ngx_modules[m]->ctx_index;
 
@@ -233,7 +233,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     /* parse inside the http{} block */
-
+    // 递归解析
     cf->module_type = NGX_HTTP_MODULE;
     cf->cmd_type = NGX_HTTP_MAIN_CONF;
     rv = ngx_conf_parse(cf, NULL);
@@ -246,7 +246,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      * init http{} main_conf's, merge the server{}s' srv_conf's
      * and its location{}s' loc_conf's
      */
-
+    // ngx_http_core_create_main_conf 创建
     cmcf = ctx->main_conf[ngx_http_core_module.ctx_index];
     cscfp = cmcf->servers.elts;
 
@@ -331,7 +331,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
     /* optimize the lists of ports, addresses and server names */
-
+    // 优化监听地址列表，将监听地址放入 ngx_conf_s.cycle->listening数组
     if (ngx_http_optimize_servers(cf, cmcf, cmcf->ports) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
@@ -1191,7 +1191,7 @@ ngx_http_add_listen(ngx_conf_t *cf, ngx_http_core_srv_conf_t *cscf,
         }
 
         /* a port is already in the port list */
-
+        // 端口已存在
         return ngx_http_add_addresses(cf, cscf, &port[i], lsopt);
     }
 

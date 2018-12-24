@@ -35,7 +35,7 @@ struct ngx_shm_zone_s {
 
 
 struct ngx_cycle_s {
-	// 保存每个module的conf
+	// 保存每个core module调用 create_conf 的返回值
     void                  ****conf_ctx;
     ngx_pool_t               *pool;
 
@@ -43,12 +43,13 @@ struct ngx_cycle_s {
     ngx_log_t                 new_log;
 
     ngx_connection_t        **files;
+    // 指针头
     ngx_connection_t         *free_connections;
-    // 剩余的空闲连接
+    // free_connections长度
     ngx_uint_t                free_connection_n;
 
     ngx_queue_t               reusable_connections_queue;
-	//继承的socket
+	//监听的socket列表ngx_listening_t
     ngx_array_t               listening;
 	// 会在ngx_create_paths 逐个创建目录
     ngx_array_t               paths;
@@ -73,13 +74,13 @@ struct ngx_cycle_s {
 
 	//
     ngx_str_t                 lock_file;
-    ngx_str_t                 hostname;
+    ngx_str_t                 hostname; // 本地主机名
 };
 
 
 typedef struct {
      ngx_flag_t               daemon;
-     ngx_flag_t               master;
+     ngx_flag_t               master; // 是否是master进程
 
      ngx_msec_t               timer_resolution;
      // 工作进程的数目
