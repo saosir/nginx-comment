@@ -83,7 +83,7 @@ struct ngx_queue_s {
 
 #endif
 
-// 将对立从q元素开始分裂，q与后面的元素
+// 将队列h从q元素开始分裂，q与后面的元素
 // 作为新队列放到n中，n为一个空队列，完成
 // 操作后q为n的第一个元素
 #define ngx_queue_split(h, q, n)                                              \

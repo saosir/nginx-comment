@@ -109,7 +109,7 @@ struct ngx_open_file_s {
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
 
 struct ngx_module_s {
-    ngx_uint_t            ctx_index; // 二级模块下标
+    ngx_uint_t            ctx_index; // ctx指向内容的下标
 	// main函数中，在ngx_init_cycle调用之前会统一分配下标
 	// 表示在cycle->conf_ctx的下标ngx_get_conf(cycle->conf_ctx, ngx_core_module)
     ngx_uint_t            index;
@@ -178,7 +178,7 @@ struct ngx_conf_s {
 
     void                 *ctx; // 每个模块初始化时候返回
     ngx_uint_t            module_type;
-    ngx_uint_t            cmd_type;
+    ngx_uint_t            cmd_type; // 当前解析到配置文件哪些指令集
 
     ngx_conf_handler_pt   handler;
     char                 *handler_conf;

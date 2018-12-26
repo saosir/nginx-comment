@@ -555,7 +555,14 @@ struct ngx_http_request_s {
     u_char                           *method_end;
     u_char                           *schema_start;
     u_char                           *schema_end;
-    u_char                           *host_start;
+	// 指向http头部的Host字符串
+	//             port_start  port_end
+	//                    |   |
+	// Host: www.test.com:8080
+	//       ^           ^
+	//       |           |
+	//   host_start  host_end
+    u_char                           *host_start; 
     u_char                           *host_end;
     u_char                           *port_start;
     u_char                           *port_end;

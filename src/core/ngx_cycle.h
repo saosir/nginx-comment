@@ -83,8 +83,7 @@ typedef struct {
      ngx_flag_t               master; // 是否是master进程
 
      ngx_msec_t               timer_resolution;
-     // 工作进程的数目
-     ngx_int_t                worker_processes;
+     ngx_int_t                worker_processes;      // 工作进程的数目
      ngx_int_t                debug_points;
 
      ngx_int_t                rlimit_nofile;

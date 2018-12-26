@@ -64,7 +64,7 @@ ngx_conf_param(ngx_conf_t *cf)
 {
     char             *rv;
     ngx_str_t        *param;
-    ngx_buf_t         b;
+    ngx_buf_t         b; // 本地变量用于读取conf_param字符串
     ngx_conf_file_t   conf_file;
 
     param = &cf->cycle->conf_param;
@@ -453,9 +453,30 @@ ngx_conf_read_token(ngx_conf_t *cf)
 
     for ( ;; ) {
         // 缓存区为空，需要读文件内容
-        if (b->pos >= b->last) {
+        if (b->pos >= b->last) { // 缓存区不足，从文件读取内容
 
             // 文件已经读取完毕
+            if (cf->conf_file->file.offset >= file_size) {
+
+                if (cf->args->nelts > 0 || !last_space) {
+
+                    if (cf->conf_file->file.fd == NGX_INVALID_FILE) {
+                        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                                           "unexpected end of parameter, "
+                                           "expecting \";\"");
+                        return NGX_ERROR;
+                    }
+
+                    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                                  "unexpected end of file, "
+                                  "expecting \";\" or \"}\"");
+                    return NGX_ERROR;
+                }
+
+                return NGX_CONF_FILE_DONE;
+            }
+
+            len = b->pos - start;
             if (cf->conf_file->file.offset >= file_size) {
 
                 if (cf->args->nelts > 0 || !last_space) {

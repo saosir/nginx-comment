@@ -208,7 +208,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
     case 0:
         ngx_pid = ngx_getpid();
         //子进程进入ngx_worker_process_cycle，开始事件循环处理
-        proc(cycle, data);
+        proc(cycle, data); // worker 进行结束在proc中直接调用exit
         break;
 
     default:

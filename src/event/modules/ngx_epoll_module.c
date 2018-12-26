@@ -564,7 +564,7 @@ static ngx_int_t
 ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
 {
     int                events;
-    uint32_t           revents;
+    uint32_t           revents; // read event
     ngx_int_t          instance, i;
     ngx_uint_t         level;
     ngx_err_t          err;

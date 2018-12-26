@@ -2831,7 +2831,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
     }
 
     http_ctx = cf->ctx;
-    ctx->main_conf = http_ctx->main_conf;
+    ctx->main_conf = http_ctx->main_conf; // 未重新申请
 
     /* the server{}'s srv_conf */
 
@@ -2898,7 +2898,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
 
     rv = ngx_conf_parse(cf, NULL);
 
-    *cf = pcf;
+    *cf = pcf; // 还原
 
     if (rv == NGX_CONF_OK && !cscf->listen) {
         ngx_memzero(&lsopt, sizeof(ngx_http_listen_opt_t));

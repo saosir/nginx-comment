@@ -64,7 +64,7 @@ struct ngx_event_s {
     unsigned         eof:1;
     unsigned         error:1;
 
-    unsigned         timedout:1;
+    unsigned         timedout:1; // 是否已经超时
     unsigned         timer_set:1;
 
     unsigned         delayed:1;
@@ -130,7 +130,7 @@ struct ngx_event_s {
     ngx_uint_t       index;
 
     ngx_log_t       *log;
-    // 红黑树作为计时器，libevent使用的是二叉堆 
+    // 计时器红黑树节点
     ngx_rbtree_node_t   timer;
 
     unsigned         closed:1;

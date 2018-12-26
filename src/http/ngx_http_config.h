@@ -15,6 +15,7 @@
 
 
 typedef struct {
+    // cf->ctx_index获得对应http模块配置
     void        **main_conf;
     void        **srv_conf;
     void        **loc_conf;

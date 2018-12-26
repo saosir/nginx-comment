@@ -66,7 +66,7 @@ failed：内存池分配失败次数。
 
 */
 typedef struct {
-    u_char               *last; // 当前分配到内存那个位置，last之前的内存是已分配出去
+    u_char               *last; // 当前分配到内存哪个位置，last之前的内存是已分配出去
     u_char               *end;  // 内存页尾部，end-last可以知道还剩余多少内存可以使用
     ngx_pool_t           *next; // 指向下一个内存页
     ngx_uint_t            failed; // 改内存页分配失败次数
