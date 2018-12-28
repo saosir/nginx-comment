@@ -233,7 +233,7 @@ ngx_http_init_connection(ngx_connection_t *c)
     }
 }
 
-
+// http连接可读
 static void
 ngx_http_init_request(ngx_event_t *rev)
 {
@@ -301,7 +301,7 @@ ngx_http_init_request(ngx_event_t *rev)
         hc->request = r;
     }
 
-    c->data = r;
+    c->data = r; // 由ngx_http_connection 变为 ngx_http_request
     r->http_connection = hc;
 
     c->sent = 0;
@@ -703,7 +703,7 @@ ngx_http_ssl_servername(ngx_ssl_conn_t *ssl_conn, int *ad, void *arg)
 
 #endif
 
-
+// http连接有数据，解析http首行
 static void
 ngx_http_process_request_line(ngx_event_t *rev)
 {
@@ -732,15 +732,16 @@ ngx_http_process_request_line(ngx_event_t *rev)
     for ( ;; ) {
 
         if (rc == NGX_AGAIN) {
-            n = ngx_http_read_request_header(r);
+            n = ngx_http_read_request_header(r); // 从socket读取数据
 
             if (n == NGX_AGAIN || n == NGX_ERROR) {
                 return;
             }
         }
 
-        rc = ngx_http_parse_request_line(r, r->header_in);
+        rc = ngx_http_parse_request_line(r, r->header_in); // 解析http first line
 
+        // 解析成功将 首行 信息赋值给变量方便后面使用
         if (rc == NGX_OK) {
 
             /* the request line has been parsed successfully */
@@ -928,14 +929,14 @@ ngx_http_process_request_line(ngx_event_t *rev)
             }
 
             c->log->action = "reading client request headers";
-
+            // 解析首行完成，开始读取解析http头部
             rev->handler = ngx_http_process_request_headers;
             ngx_http_process_request_headers(rev);
 
             return;
         }
-
-        if (rc != NGX_AGAIN) {
+        // 首行未读取完或者解析失败
+        if (rc != NGX_AGAIN) { // 解析失败
 
             /* there was error while a request line parsing */
 
@@ -969,7 +970,7 @@ ngx_http_process_request_line(ngx_event_t *rev)
     }
 }
 
-
+// 读取并解析http头部
 static void
 ngx_http_process_request_headers(ngx_event_t *rev)
 {
@@ -1156,7 +1157,7 @@ ngx_http_process_request_headers(ngx_event_t *rev)
     }
 }
 
-
+// 从ngx_http_connection读取数据
 static ssize_t
 ngx_http_read_request_header(ngx_http_request_t *r)
 {
@@ -1170,11 +1171,12 @@ ngx_http_read_request_header(ngx_http_request_t *r)
 
     n = r->header_in->last - r->header_in->pos;
 
-    if (n > 0) {
+    if (n > 0) { // 还有数据，不需要读取
         return n;
     }
 
     if (rev->ready) {
+        // 从连接中读取数据
         n = c->recv(c, r->header_in->last,
                     r->header_in->end - r->header_in->last);
     } else {
@@ -1182,6 +1184,7 @@ ngx_http_read_request_header(ngx_http_request_t *r)
     }
 
     if (n == NGX_AGAIN) {
+        // 暂时没有数据，需要再次读取，设置一个计时器防止一直没有数据
         if (!rev->timer_set) {
             cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
             ngx_add_timer(rev, cscf->client_header_timeout);
@@ -1208,7 +1211,7 @@ ngx_http_read_request_header(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
-    r->header_in->last += n;
+    r->header_in->last += n; // 读取n字节，last往后移动，但是保证 last <= end
 
     return n;
 }
@@ -1680,7 +1683,7 @@ ngx_http_process_request(ngx_http_request_t *r)
     (void) ngx_atomic_fetch_add(ngx_stat_writing, 1);
     r->stat_writing = 1;
 #endif
-
+    // 头部读取完毕，修改c->read->handler回调
     c->read->handler = ngx_http_request_handler;
     c->write->handler = ngx_http_request_handler;
     r->read_event_handler = ngx_http_block_reading;

@@ -461,6 +461,7 @@ ngx_http_init_phase_handlers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf)
 
     n = use_rewrite + use_access + cmcf->try_files + 1 /* find config phase */;
 
+    // n handler总数
     for (i = 0; i < NGX_HTTP_LOG_PHASE; i++) {
         n += cmcf->phases[i].handlers.nelts;
     }
@@ -470,12 +471,12 @@ ngx_http_init_phase_handlers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf)
     if (ph == NULL) {
         return NGX_ERROR;
     }
-
+    // 设置 checker 并串联链表
     cmcf->phase_engine.handlers = ph;
     n = 0;
 
     for (i = 0; i < NGX_HTTP_LOG_PHASE; i++) {
-        h = cmcf->phases[i].handlers.elts;
+        h = cmcf->phases[i].handlers.elts; // ngx_http_access_init 往该数组添加ngx_http_access_handler函数
 
         switch (i) {
 
@@ -545,12 +546,13 @@ ngx_http_init_phase_handlers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf)
             checker = ngx_http_core_generic_phase;
         }
 
-        n += cmcf->phases[i].handlers.nelts;
+        n += cmcf->phases[i].handlers.nelts; // 将数组一次性放入cmcf->phase_engine.handlers
 
+        // 越往后注册越早被调用
         for (j = cmcf->phases[i].handlers.nelts - 1; j >=0; j--) {
             ph->checker = checker;
             ph->handler = h[j];
-            ph->next = n;
+            ph->next = n; // 指向下一阶段
             ph++;
         }
     }

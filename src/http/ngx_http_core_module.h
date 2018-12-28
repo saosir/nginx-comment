@@ -136,7 +136,7 @@ struct ngx_http_phase_handler_s {
     // 一般checker中会调用handler
     ngx_http_phase_handler_pt  checker;
     ngx_http_handler_pt        handler;
-    ngx_uint_t                 next;
+    ngx_uint_t                 next; // phase 下一阶段
 };
 
 
