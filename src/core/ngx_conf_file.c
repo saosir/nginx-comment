@@ -307,7 +307,6 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
             }
 
             found = 1;
-
             if (ngx_modules[i]->type != NGX_CONF_MODULE
                 && ngx_modules[i]->type != cf->module_type)
             {
@@ -374,9 +373,11 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
                 conf = ((void **) cf->ctx)[ngx_modules[i]->index];
 
             } else if (cmd->type & NGX_MAIN_CONF) {
-                conf = &(((void **) cf->ctx)[ngx_modules[i]->index]); // 有可能会被修改
+                // 主配置conf可能会被cmd->set修改为配置上下文
+                conf = &(((void **) cf->ctx)[ngx_modules[i]->index]);
 
             } else if (cf->ctx) {
+                // 普通配置指令
                 confp = *(void **) ((char *) cf->ctx + cmd->conf);
 
                 if (confp) {

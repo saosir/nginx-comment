@@ -23,9 +23,12 @@ typedef struct {
 
 
 typedef struct {
+    // 解析配置前执行
     ngx_int_t   (*preconfiguration)(ngx_conf_t *cf);
+    // 解析完成配置后执行
     ngx_int_t   (*postconfiguration)(ngx_conf_t *cf);
-
+    // create_main_conf在ngx_http_module中ngx_http_block调用，用于创建http模块的配置上下文
+    // 解析命令的时候
     void       *(*create_main_conf)(ngx_conf_t *cf);
     char       *(*init_main_conf)(ngx_conf_t *cf, void *conf);
 

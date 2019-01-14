@@ -77,7 +77,7 @@
 
 struct ngx_command_s {
     ngx_str_t             name;
-    ngx_uint_t            type;
+    ngx_uint_t            type; // 命令类型，会与ngx_conf_t.cmd_type做与运算
     char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
     ngx_uint_t            conf;
     ngx_uint_t            offset;
@@ -109,10 +109,10 @@ struct ngx_open_file_s {
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
 
 struct ngx_module_s {
-    ngx_uint_t            ctx_index; // ctx指向内容的下标
+    ngx_uint_t            ctx_index; // 二级模块上下文
 	// main函数中，在ngx_init_cycle调用之前会统一分配下标
 	// 表示在cycle->conf_ctx的下标ngx_get_conf(cycle->conf_ctx, ngx_core_module)
-    ngx_uint_t            index;
+    ngx_uint_t            index; // 所有模块在main函数都能分配到一个下标
 
     ngx_uint_t            spare0;
     ngx_uint_t            spare1;
@@ -121,7 +121,9 @@ struct ngx_module_s {
 
     ngx_uint_t            version;
 
-    // 不同模块会有不同context，core module前三个字段和ngx_core_module_t一样有name/create_conf/init_conf三个字段
+    // 不同模块ctx指向不同类型结构体，如：
+    // ngx_core_module 和 ngx_http_module 为 ngx_core_module_t
+    // ngx_http_module_t 为 ngx_http_core_module_ctx
     void                 *ctx;
     ngx_command_t        *commands;
     ngx_uint_t            type;
@@ -177,7 +179,7 @@ struct ngx_conf_s {
     ngx_log_t            *log;
 
     void                 *ctx; // 每个模块初始化时候返回
-    ngx_uint_t            module_type;
+    ngx_uint_t            module_type; // 当前解析的配置文件所属的模块类型
     ngx_uint_t            cmd_type; // 当前解析到配置文件哪些指令集
 
     ngx_conf_handler_pt   handler;

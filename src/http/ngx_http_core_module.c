@@ -860,7 +860,7 @@ ngx_http_handler(ngx_http_request_t *r)
     ngx_http_core_run_phases(r);
 }
 
-
+// 运行http phases 的checker
 void
 ngx_http_core_run_phases(ngx_http_request_t *r)
 {
@@ -873,7 +873,7 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
     ph = cmcf->phase_engine.handlers;
 
     while (ph[r->phase_handler].checker) {
-
+        // checker中会调用handle
         rc = ph[r->phase_handler].checker(r, &ph[r->phase_handler]);
 
         if (rc == NGX_OK) {
@@ -882,7 +882,7 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
     }
 }
 
-
+// POST_READ/PREACCESS phase 的checker
 ngx_int_t
 ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 {
@@ -898,22 +898,22 @@ ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 
     rc = ph->handler(r);
 
-    if (rc == NGX_OK) {
+    if (rc == NGX_OK) { // 进入下一阶段
         r->phase_handler = ph->next;
         return NGX_AGAIN;
     }
 
-    if (rc == NGX_DECLINED) {
+    if (rc == NGX_DECLINED) { // 进入本阶段的下一个handler
         r->phase_handler++;
         return NGX_AGAIN;
     }
 
-    if (rc == NGX_AGAIN || rc == NGX_DONE) {
+    if (rc == NGX_AGAIN || rc == NGX_DONE) { // 需要等待某个事件发生
         return NGX_OK;
     }
 
     /* rc == NGX_ERROR || rc == NGX_HTTP_...  */
-
+    // handler 返回错误
     ngx_http_finalize_request(r, rc);
 
     return NGX_OK;

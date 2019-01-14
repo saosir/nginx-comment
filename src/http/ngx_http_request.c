@@ -1051,11 +1051,11 @@ ngx_http_process_request_headers(ngx_event_t *rev)
                 return;
             }
         }
-
+        // 每次解析一个键值http头部
         rc = ngx_http_parse_header_line(r, r->header_in,
                                         cscf->underscores_in_headers);
 
-        if (rc == NGX_OK) {
+        if (rc == NGX_OK) { // 解析完一个http头部
 
             r->request_length += r->header_in->pos - r->header_name_start;
 
@@ -1103,7 +1103,8 @@ ngx_http_process_request_headers(ngx_event_t *rev)
 
             hh = ngx_hash_find(&cmcf->headers_in_hash, h->hash,
                                h->lowcase_key, h->key.len);
-
+            // 调用回调用于设置ngx_http_requests_t.headers_in属性，
+            // 如解析到 Connection: close调用 ngx_http_process_connection
             if (hh && hh->handler(r, h, hh->offset) != NGX_OK) {
                 return;
             }
@@ -1115,7 +1116,7 @@ ngx_http_process_request_headers(ngx_event_t *rev)
             continue;
         }
 
-        if (rc == NGX_HTTP_PARSE_HEADER_DONE) {
+        if (rc == NGX_HTTP_PARSE_HEADER_DONE) { // http头部解析完成
 
             /* a whole header has been parsed successfully */
 
@@ -1539,7 +1540,7 @@ ngx_http_process_cookie(ngx_http_request_t *r, ngx_table_elt_t *h,
     return NGX_ERROR;
 }
 
-
+// 校验http头部是否正常
 static ngx_int_t
 ngx_http_process_request_header(ngx_http_request_t *r)
 {
@@ -1684,7 +1685,7 @@ ngx_http_process_request(ngx_http_request_t *r)
     c->write->handler = ngx_http_request_handler;
     r->read_event_handler = ngx_http_block_reading;
 
-    ngx_http_handler(r);
+    ngx_http_handler(r); // 处理请求，调用 http_phase
 
     ngx_http_run_posted_requests(c);
 }

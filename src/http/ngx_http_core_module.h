@@ -129,6 +129,7 @@ typedef ngx_int_t (*ngx_http_phase_handler_pt)(ngx_http_request_t *r,
     ngx_http_phase_handler_t *ph);
 
 struct ngx_http_phase_handler_s {
+    // 一般checker中会调用handler
     ngx_http_phase_handler_pt  checker;
     ngx_http_handler_pt        handler;
     ngx_uint_t                 next;
@@ -171,7 +172,7 @@ typedef struct {
 
     ngx_uint_t                 try_files;       /* unsigned  try_files:1 */
 
-    ngx_http_phase_t           phases[NGX_HTTP_LOG_PHASE + 1];
+    ngx_http_phase_t           phases[NGX_HTTP_LOG_PHASE + 1]; // 11 个 phase，每个phase可以注册多个handler
 } ngx_http_core_main_conf_t;
 
 

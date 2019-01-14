@@ -173,7 +173,7 @@ typedef struct {
 
 
 typedef struct {
-    ngx_list_t                        headers;
+    ngx_list_t                        headers;// http键值列表
 
     ngx_table_elt_t                  *host;
     ngx_table_elt_t                  *connection;
@@ -529,13 +529,13 @@ struct ngx_http_request_s {
 #endif
 
     /* used to parse HTTP headers */
-
+    // 每解析一个键值头部返回一次
     ngx_uint_t                        state;
 
     ngx_uint_t                        header_hash;
     ngx_uint_t                        lowcase_index;
     u_char                            lowcase_header[NGX_HTTP_LC_HEADER_LEN];
-
+    
     u_char                           *header_name_start;
     u_char                           *header_name_end;
     u_char                           *header_start;

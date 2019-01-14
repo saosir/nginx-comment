@@ -16,10 +16,13 @@
 
 
 typedef struct {
+    // set_real_ip_from 添加的ip、cidr或者unixsocket
     ngx_array_t       *from;     /* array of ngx_cidr_t */
+    // real_ip_header指定的http头部
     ngx_uint_t         type;
     ngx_uint_t         hash;
     ngx_str_t          header;
+    // real_ip_recursive 开关
     ngx_flag_t         recursive;
 } ngx_http_realip_loc_conf_t;
 
@@ -125,10 +128,12 @@ ngx_http_realip_handler(ngx_http_request_t *r)
 
     rlcf = ngx_http_get_module_loc_conf(r, ngx_http_realip_module);
 
+    // 未设置 set_real_ip_from，直接进入下一阶段
     if (rlcf->from == NULL) {
         return NGX_DECLINED;
     }
 
+    // 从real_ip_header指定的头部中取得真实客户端ip
     switch (rlcf->type) {
 
     case NGX_HTTP_REALIP_XREALIP:
@@ -189,7 +194,7 @@ ngx_http_realip_handler(ngx_http_request_t *r)
     }
 
 found:
-
+    // 修改 r-connection中客户端的ip地址
     c = r->connection;
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "realip: \"%s\"", ip);
@@ -197,7 +202,7 @@ found:
     addr.sockaddr = c->sockaddr;
     addr.socklen = c->socklen;
     /* addr.name = c->addr_text; */
-
+    // 如果开启real_ip_recursive选项ngx_http_get_forwarded_addr会过滤代理IP
     if (ngx_http_get_forwarded_addr(r, &addr, ip, len, rlcf->from,
                                     rlcf->recursive)
         == NGX_OK)

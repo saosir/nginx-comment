@@ -184,7 +184,7 @@ ngx_module_t  ngx_core_module = {
 };
 
 
-ngx_uint_t          ngx_max_module;
+ngx_uint_t          ngx_max_module; // 模块总数，main函数总分配模块下标
 
 static ngx_uint_t   ngx_show_help;
 static ngx_uint_t   ngx_show_version;

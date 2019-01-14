@@ -66,7 +66,7 @@ static ngx_int_t ngx_http_add_addrs6(ngx_conf_t *cf, ngx_http_port_t *hport,
     ngx_http_conf_addr_t *addr);
 #endif
 
-ngx_uint_t   ngx_http_max_module;
+ngx_uint_t   ngx_http_max_module; // http_module总数
 
 
 ngx_int_t  (*ngx_http_top_header_filter) (ngx_http_request_t *r);
@@ -138,7 +138,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
     /* count the number of the http modules and set up their indices */
-    // 可以存在多个http模块
+
     ngx_http_max_module = 0;
     for (m = 0; ngx_modules[m]; m++) {
         if (ngx_modules[m]->type != NGX_HTTP_MODULE) {
@@ -487,7 +487,7 @@ ngx_http_init_phase_handlers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf)
 
             break;
 
-        case NGX_HTTP_FIND_CONFIG_PHASE:
+        case NGX_HTTP_FIND_CONFIG_PHASE: // 内置phase，至少存在一个
             find_config_index = n;
 
             ph->checker = ngx_http_core_find_config_phase;
