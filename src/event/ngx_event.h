@@ -65,7 +65,7 @@ struct ngx_event_s {
     unsigned         error:1;
 
     unsigned         timedout:1; // 是否已经超时
-    unsigned         timer_set:1;
+    unsigned         timer_set:1; // 是否已加入红黑树计时器
 
     unsigned         delayed:1;
 

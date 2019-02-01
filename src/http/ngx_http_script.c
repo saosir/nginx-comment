@@ -317,7 +317,7 @@ ngx_http_set_predicate_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return NGX_CONF_OK;
 }
 
-
+// nginx配置文件value中包含的变量数
 ngx_uint_t
 ngx_http_script_variables_count(ngx_str_t *value)
 {

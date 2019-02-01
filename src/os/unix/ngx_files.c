@@ -159,7 +159,7 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
     struct iovec  *iov, iovs[NGX_IOVS];
 
     /* use pwrite() if there is the only buf in a chain */
-
+    // 只有一个buf情况
     if (cl->next == NULL) {
         return ngx_write_file(file, cl->buf->pos,
                               (size_t) (cl->buf->last - cl->buf->pos),
@@ -167,7 +167,7 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
     }
 
     total = 0;
-
+    // 通过writev批量写入
     vec.elts = iovs;
     vec.size = sizeof(struct iovec);
     vec.nalloc = NGX_IOVS;
@@ -181,9 +181,9 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
         vec.nelts = 0;
 
         /* create the iovec and coalesce the neighbouring bufs */
-
+        // 每次调用writev最多写入IOV_MAX个iovec
         while (cl && vec.nelts < IOV_MAX) {
-            if (prev == cl->buf->pos) {
+            if (prev == cl->buf->pos) { // 与上一次输入相同，不需要创建新的iovec
                 iov->iov_len += cl->buf->last - cl->buf->pos;
 
             } else {
@@ -215,7 +215,7 @@ ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *cl, off_t offset,
 
             return total + n;
         }
-
+        // bug:如果外层do while执行超过一次设置文件偏移会出错，后续版本确认已经修复
         if (file->sys_offset != offset) {
             if (lseek(file->fd, offset, SEEK_SET) == -1) {
                 ngx_log_error(NGX_LOG_CRIT, file->log, ngx_errno,

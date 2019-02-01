@@ -102,13 +102,17 @@ typedef struct {
     u_char                     addr[NGX_SOCKADDR_STRLEN + 1];
 } ngx_http_listen_opt_t;
 
-
+// phases函数返回值表示意义：
+// NGX_OK 此阶段处理完成转入下一阶段
+// NGX_DECLINED 转入本阶段下一个handler
+// NGX_AGIN, NGX_DONE 等待某个事件发生才能继续处理
+// NGX_ERROR 处理错误结束该请求
 typedef enum {
-    NGX_HTTP_POST_READ_PHASE = 0,
+    NGX_HTTP_POST_READ_PHASE = 0, // 接受完header调用，realip模块在此阶段注册
 
     NGX_HTTP_SERVER_REWRITE_PHASE,
 
-    NGX_HTTP_FIND_CONFIG_PHASE,
+    NGX_HTTP_FIND_CONFIG_PHASE, // 根据uri查找location，内置phase
     NGX_HTTP_REWRITE_PHASE,
     NGX_HTTP_POST_REWRITE_PHASE,
 
@@ -347,6 +351,7 @@ struct ngx_http_core_loc_conf_s {
     off_t         directio;                /* directio */
     off_t         directio_alignment;      /* directio_alignment */
 
+    // 接受body缓冲大小，默认2*page_size
     size_t        client_body_buffer_size; /* client_body_buffer_size */
     size_t        send_lowat;              /* send_lowat */
     size_t        postpone_output;         /* postpone_output */

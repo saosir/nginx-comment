@@ -541,7 +541,7 @@ ngx_http_init_phase_handlers(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf)
             checker = ngx_http_core_content_phase;
             break;
 
-        default:
+        default: // 默认phase_handler
             checker = ngx_http_core_generic_phase;
         }
 

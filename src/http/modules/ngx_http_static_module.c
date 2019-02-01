@@ -223,7 +223,7 @@ ngx_http_static_handler(ngx_http_request_t *r)
     if (ngx_http_set_content_type(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
-
+    // 文件大小为0
     if (r != r->main && of.size == 0) {
         return ngx_http_send_header(r);
     }

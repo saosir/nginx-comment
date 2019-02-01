@@ -984,6 +984,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
                    "http cl:%O max:%O",
                    r->headers_in.content_length_n, clcf->client_max_body_size);
 
+    // body过大，通过content-length确认
     if (r->headers_in.content_length_n != -1
         && !r->discard_body
         && clcf->client_max_body_size
@@ -997,7 +998,7 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
         ngx_http_finalize_request(r, NGX_HTTP_REQUEST_ENTITY_TOO_LARGE);
         return NGX_OK;
     }
-
+    // 重定向，设置header_out.location
     if (rc == NGX_DONE) {
         ngx_http_clear_location(r);
 
@@ -1391,6 +1392,7 @@ ngx_http_core_content_phase(ngx_http_request_t *r,
     ngx_int_t  rc;
     ngx_str_t  path;
 
+    // 有content_handler就不会往下执行
     if (r->content_handler) {
         r->write_event_handler = ngx_http_request_empty_handler;
         ngx_http_finalize_request(r, r->content_handler(r));
@@ -1417,7 +1419,7 @@ ngx_http_core_content_phase(ngx_http_request_t *r,
     }
 
     /* no content handler was found */
-
+    // 访问目录返回forbidden
     if (r->uri.data[r->uri.len - 1] == '/') {
 
         if (ngx_http_map_uri_to_path(r, &path, &root, 0) != NULL) {
@@ -1515,7 +1517,7 @@ ngx_http_update_location_config(ngx_http_request_t *r)
     if (r->limit_rate == 0) {
         r->limit_rate = clcf->limit_rate;
     }
-
+    // core location有handler，如location中有proxy_pass指令
     if (clcf->handler) {
         r->content_handler = clcf->handler;
     }
@@ -1529,7 +1531,7 @@ ngx_http_update_location_config(ngx_http_request_t *r)
  * NGX_ERROR    - regex error
  * NGX_DECLINED - no match
  */
-
+// 根据请求uri查找location
 static ngx_int_t
 ngx_http_core_find_location(ngx_http_request_t *r)
 {
@@ -1655,14 +1657,14 @@ ngx_http_core_find_static_location(ngx_http_request_t *r,
 
             /* exact only */
 
-            node = node->right;
+            node = node->right; // 请求uri长度并loc的长
 
             continue;
         }
 
         if (len == (size_t) node->len) {
 
-            if (node->exact) {
+            if (node->exact) { // 精确定位
                 r->loc_conf = node->exact->loc_conf;
                 return NGX_OK;
 
@@ -1728,6 +1730,7 @@ ngx_http_test_content_type(ngx_http_request_t *r, ngx_hash_t *types_hash)
 }
 
 
+// 设置响应http头部conten-type
 ngx_int_t
 ngx_http_set_content_type(ngx_http_request_t *r)
 {
@@ -1920,6 +1923,7 @@ ngx_http_output_filter(ngx_http_request_t *r, ngx_chain_t *in)
 }
 
 
+// 将http协议路径转换为真实文件系统路径
 u_char *
 ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path,
     size_t *root_length, size_t reserved)
@@ -4293,7 +4297,7 @@ ngx_http_core_root(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     clcf->alias = alias ? clcf->name.len : 0;
     clcf->root = value[1];
-
+    // 去掉root命令尾部的斜杠/
     if (!alias && clcf->root.data[clcf->root.len - 1] == '/') {
         clcf->root.len--;
     }

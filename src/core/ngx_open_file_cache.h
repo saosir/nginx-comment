@@ -59,7 +59,7 @@ struct ngx_cached_open_file_s {
 
     u_char                  *name;
     time_t                   created;
-    time_t                   accessed;
+    time_t                   accessed; // 最近访问时间
 
     ngx_fd_t                 fd;
     ngx_file_uniq_t          uniq;
@@ -89,13 +89,13 @@ struct ngx_cached_open_file_s {
 
 
 typedef struct {
-    ngx_rbtree_t             rbtree;
+    ngx_rbtree_t             rbtree; // 方便使用文件名查找
     ngx_rbtree_node_t        sentinel;
-    ngx_queue_t              expire_queue;
+    ngx_queue_t              expire_queue; // 所有打开文件列表，根据accessed有序，头结点为最近访问
 
-    ngx_uint_t               current;
-    ngx_uint_t               max;
-    time_t                   inactive;
+    ngx_uint_t               current; // 当前cache的文件数量
+    ngx_uint_t               max; // cache最大数量
+    time_t                   inactive; // cache过期时间
 } ngx_open_file_cache_t;
 
 

@@ -62,6 +62,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
+    // 请求body为空
     if (r->headers_in.content_length_n == 0) {
 
         if (r->request_body_in_file_only) {
@@ -107,7 +108,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
      *     rb->buf = NULL;
      *     rb->rest = 0;
      */
-
+    // header之后的数据
     preread = r->header_in->last - r->header_in->pos;
 
     if (preread) {
@@ -121,7 +122,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
         if (b == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
-
+        // 引用header_in头部之后的内存片
         b->temporary = 1;
         b->start = r->header_in->pos;
         b->pos = r->header_in->pos;
@@ -137,7 +138,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
         rb->bufs->next = NULL;
 
         rb->buf = b;
-
+        // body已经读取完成
         if ((off_t) preread >= r->headers_in.content_length_n) {
 
             /* the whole request body was pre-read */
@@ -167,6 +168,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
 
         rb->rest = r->headers_in.content_length_n - preread;
 
+        // 剩余需要读取的body可以全部放到buf中
         if (rb->rest <= (off_t) (b->end - b->last)) {
 
             /* the whole request body may be placed in r->header_in */
@@ -186,6 +188,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
         next = &rb->bufs;
     }
 
+    // 3/2 body_buffer_size
     size = clcf->client_body_buffer_size;
     size += size >> 2;
 
@@ -224,7 +227,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
         next = &rb->bufs;
     }
 
-    *next = cl;
+    *next = cl; // 链接buf
 
     if (r->request_body_in_file_only || r->request_body_in_single_buf) {
         rb->to_write = rb->bufs;
@@ -285,7 +288,7 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
                 rb->to_write = rb->bufs->next ? rb->bufs->next : rb->bufs;
                 rb->buf->last = rb->buf->start;
             }
-
+            // 可用大小
             size = rb->buf->end - rb->buf->last;
 
             if ((off_t) size > rb->rest) {
@@ -386,7 +389,7 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
     return NGX_OK;
 }
 
-
+// 将body写入临时文件
 static ngx_int_t
 ngx_http_write_request_body(ngx_http_request_t *r, ngx_chain_t *body)
 {
@@ -557,7 +560,7 @@ ngx_http_discarded_request_body_handler(ngx_http_request_t *r)
     }
 }
 
-
+// 从连接读取数据然后丢弃
 static ngx_int_t
 ngx_http_read_discarded_request_body(ngx_http_request_t *r)
 {
@@ -577,7 +580,7 @@ ngx_http_read_discarded_request_body(ngx_http_request_t *r)
         if (!r->connection->read->ready) {
             return NGX_AGAIN;
         }
-
+        // 需要读取的字节数
         size = (r->headers_in.content_length_n > NGX_HTTP_DISCARD_BUFFER_SIZE) ?
                    NGX_HTTP_DISCARD_BUFFER_SIZE:
                    (size_t) r->headers_in.content_length_n;

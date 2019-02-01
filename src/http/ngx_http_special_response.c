@@ -606,7 +606,7 @@ ngx_http_send_error_page(ngx_http_request_t *r, ngx_http_err_page_t *err_page)
                                                    + NGX_HTTP_OFF_3XX);
 }
 
-
+// 返回特定错误码的页面内容
 static ngx_int_t
 ngx_http_send_special_response(ngx_http_request_t *r,
     ngx_http_core_loc_conf_t *clcf, ngx_uint_t err)

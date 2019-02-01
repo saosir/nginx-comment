@@ -225,7 +225,7 @@ typedef struct {
     ngx_array_t                       cookies;
 
     ngx_str_t                         server;
-    off_t                             content_length_n;
+    off_t                             content_length_n; // 当前剩余需要读取body大小，随着body读取逐渐变小
     time_t                            keep_alive_n;
 
     unsigned                          connection_type:2;
@@ -277,11 +277,11 @@ typedef struct {
 typedef void (*ngx_http_client_body_handler_pt)(ngx_http_request_t *r);
 
 typedef struct {
-    ngx_temp_file_t                  *temp_file;
+    ngx_temp_file_t                  *temp_file; // body存入临时文件
     ngx_chain_t                      *bufs;
-    ngx_buf_t                        *buf;
-    off_t                             rest;
-    ngx_chain_t                      *to_write;
+    ngx_buf_t                        *buf; // 正在使用的buf，属于bufs链表
+    off_t                             rest; // body剩余多少未读取
+    ngx_chain_t                      *to_write; // 要写入文件的buf
     ngx_http_client_body_handler_pt   post_handler;
 } ngx_http_request_body_t;
 
@@ -359,7 +359,7 @@ struct ngx_http_request_s {
     void                            **ctx;
     void                            **main_conf;
     void                            **srv_conf;
-    void                            **loc_conf;
+    void                            **loc_conf; // 命中的location，ngx_http_core_find_location查找得到
 
     ngx_http_event_handler_pt         read_event_handler;
     ngx_http_event_handler_pt         write_event_handler;
@@ -422,7 +422,7 @@ struct ngx_http_request_s {
     /* used to learn the Apache compatible response length without a header */
     size_t                            header_size;
 
-    off_t                             request_length;
+    off_t                             request_length; // 当前接受到的请求大小
 
     ngx_uint_t                        err_status;
 
@@ -461,7 +461,7 @@ struct ngx_http_request_s {
     unsigned                          uri_changes:4;
 
     unsigned                          request_body_in_single_buf:1;
-    unsigned                          request_body_in_file_only:1;
+    unsigned                          request_body_in_file_only:1; // body需要写入文件
     unsigned                          request_body_in_persistent_file:1;
     unsigned                          request_body_in_clean_file:1;
     unsigned                          request_body_file_group_access:1;

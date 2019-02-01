@@ -202,13 +202,14 @@ ngx_open_cached_file(ngx_open_file_cache_t *cache, ngx_str_t *name,
 
     hash = ngx_crc32_long(name->data, name->len);
 
+    // 查找cache是否已经打开文件
     file = ngx_open_file_lookup(cache, name, hash);
 
     if (file) {
 
         file->uses++;
 
-        ngx_queue_remove(&file->queue);
+        ngx_queue_remove(&file->queue); // 在cache中找到的话先从队列删除，保证队列根据accessed有序
 
         if (file->fd == NGX_INVALID_FILE && file->err == 0 && !file->is_dir) {
 
@@ -346,7 +347,7 @@ ngx_open_cached_file(ngx_open_file_cache_t *cache, ngx_str_t *name,
     }
 
     /* not found */
-
+    // cache中未找到打开文件
     rc = ngx_open_and_stat_file(name, of, pool->log);
 
     if (rc != NGX_OK && (of->err == 0 || !of->errors)) {
@@ -354,7 +355,7 @@ ngx_open_cached_file(ngx_open_file_cache_t *cache, ngx_str_t *name,
     }
 
 create:
-
+    // 打开的cache文件过多，使用lru踢出部分文件
     if (cache->current >= cache->max) {
         ngx_expire_old_cached_files(cache, 0, pool->log);
     }
@@ -1040,7 +1041,7 @@ ngx_expire_old_cached_files(ngx_open_file_cache_t *cache, ngx_uint_t n,
      * n == 0 deletes least recently used file by force
      *        and one or two inactive files
      */
-
+    // 如果队列非空至少删除一个，最多删除3个cache file
     while (n < 3) {
 
         if (ngx_queue_empty(&cache->expire_queue)) {
@@ -1116,7 +1117,7 @@ ngx_open_file_cache_rbtree_insert_value(ngx_rbtree_node_t *temp,
     ngx_rbt_red(node);
 }
 
-
+// 红黑树根据文件名查找
 static ngx_cached_open_file_t *
 ngx_open_file_lookup(ngx_open_file_cache_t *cache, ngx_str_t *name,
     uint32_t hash)

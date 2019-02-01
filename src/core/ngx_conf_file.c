@@ -239,7 +239,7 @@ ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
             goto failed;
         }
 
-
+        // 得到配置项，进入指令解析
         rc = ngx_conf_handler(cf, rc);
 
         if (rc == NGX_ERROR) {
@@ -378,6 +378,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
 
             } else if (cf->ctx) {
                 // 普通配置指令
+                // 如果为http模块 cmd->conf可能为NGX_HTTP_LOC_CONF_OFFSET
                 confp = *(void **) ((char *) cf->ctx + cmd->conf);
 
                 if (confp) {

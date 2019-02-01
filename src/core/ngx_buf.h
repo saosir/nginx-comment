@@ -162,6 +162,7 @@ struct ngx_buf_s {
     off_t            file_pos;
     off_t            file_last;
 
+    // 内存区间
     u_char          *start;         /* start of buffer */
     u_char          *end;           /* end of buffer */
     ngx_buf_tag_t    tag;
@@ -194,7 +195,7 @@ struct ngx_buf_s {
     /* STUB */ int   num;
 };
 
-
+// ngx_buf_t链表
 struct ngx_chain_s {
     ngx_buf_t    *buf;
     ngx_chain_t  *next;
