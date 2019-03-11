@@ -23,9 +23,9 @@ typedef struct {
     ngx_int_t                       effective_weight;
     ngx_int_t                       weight;
 
-    ngx_uint_t                      fails;
+    ngx_uint_t                      fails; // 当前peer尝试连接错误次数
     time_t                          accessed;
-    time_t                          checked;
+    time_t                          checked; // 最后一次尝试连接时间
 
     ngx_uint_t                      max_fails;
     time_t                          fail_timeout;
@@ -41,15 +41,15 @@ typedef struct {
 typedef struct ngx_http_upstream_rr_peers_s  ngx_http_upstream_rr_peers_t;
 
 struct ngx_http_upstream_rr_peers_s {
-    ngx_uint_t                      number;
-    ngx_uint_t                      last_cached;
+    ngx_uint_t                      number; // peer长度
+    ngx_uint_t                      last_cached; // cached最后元素位置
 
  /* ngx_mutex_t                    *mutex; */
     ngx_connection_t              **cached;
 
     ngx_uint_t                      total_weight;
 
-    unsigned                        single:1;
+    unsigned                        single:1; // 只有一台非backup的rs
     unsigned                        weighted:1;
 
     ngx_str_t                      *name;
@@ -62,8 +62,8 @@ struct ngx_http_upstream_rr_peers_s {
 
 typedef struct {
     ngx_http_upstream_rr_peers_t   *peers;
-    ngx_uint_t                      current;
-    uintptr_t                      *tried;
+    ngx_uint_t                      current; // peers->peer偏移下标
+    uintptr_t                      *tried; // 位图，表示是否已经尝试连接过
     uintptr_t                       data;
 } ngx_http_upstream_rr_peer_data_t;
 

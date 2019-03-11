@@ -105,9 +105,10 @@ typedef struct {
 
 
 struct ngx_http_upstream_srv_conf_s {
-    ngx_http_upstream_peer_t         peer;
+    ngx_http_upstream_peer_t         peer; // 负载均衡算法实现
     void                           **srv_conf;
 
+    // upstream.server命令解析参数
     ngx_array_t                     *servers;  /* ngx_http_upstream_server_t */
 
     ngx_uint_t                       flags;

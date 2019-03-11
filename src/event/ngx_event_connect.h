@@ -37,13 +37,14 @@ typedef void (*ngx_event_save_peer_session_pt)(ngx_peer_connection_t *pc,
 struct ngx_peer_connection_s {
     ngx_connection_t                *connection;
 
+    // 由get回调函数获取到后端backend真实地址
     struct sockaddr                 *sockaddr;
     socklen_t                        socklen;
     ngx_str_t                       *name;
 
-    ngx_uint_t                       tries;
+    ngx_uint_t                       tries; // 可以重试连接的次数，轮询负载策略初始化时候被设置为非backup服务器数 ngx_http_upstream_init_round_robin_peer
 
-    ngx_event_get_peer_pt            get;
+    ngx_event_get_peer_pt            get; //ngx_event_connect_peer中调用，负载均衡获取peer
     ngx_event_free_peer_pt           free;
     void                            *data;
 

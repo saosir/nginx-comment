@@ -24,7 +24,7 @@ static void ngx_http_upstream_empty_save_session(ngx_peer_connection_t *pc,
 
 #endif
 
-
+// 默认的负责均衡算法
 ngx_int_t
 ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
     ngx_http_upstream_srv_conf_t *us)
@@ -158,7 +158,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
         return NGX_OK;
     }
 
-
+    // upstream中没有使用server指令配置backend
     /* an upstream implicitly defined by proxy_pass, etc. */
 
     if (us->port == 0 && us->default_port == 0) {
@@ -228,10 +228,14 @@ ngx_http_upstream_cmp_servers(const void *one, const void *two)
 }
 
 
+// nginx接受客户端请求，调用ngx_http_upstream_init_request函数初始化请求过程中
+// 调用uscf->peer.init(r, uscf)，uscf->peer.init指向的函数就是ngx_http_upstream_init_round_robin_peer
+// 在ngx_http_upstream_init_round_robin进行设置
 ngx_int_t
 ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
     ngx_http_upstream_srv_conf_t *us)
 {
+    // 设置r->upstream->peer数据结构
     ngx_uint_t                         n;
     ngx_http_upstream_rr_peer_data_t  *rrp;
 
@@ -254,13 +258,13 @@ ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
     if (rrp->peers->next && rrp->peers->next->number > n) {
         n = rrp->peers->next->number;
     }
-
-    if (n <= 8 * sizeof(uintptr_t)) {
+    // 小于32只需一个int记录所有rs状态
+    if (n <= 8 * sizeof(uintptr_t)) { // 1bit表示一个peer
         rrp->tried = &rrp->data;
         rrp->data = 0;
 
     } else {
-        n = (n + (8 * sizeof(uintptr_t) - 1)) / (8 * sizeof(uintptr_t));
+        n = (n + (8 * sizeof(uintptr_t) - 1)) / (8 * sizeof(uintptr_t)); // 取整
 
         rrp->tried = ngx_pcalloc(r->pool, n * sizeof(uintptr_t));
         if (rrp->tried == NULL) {
@@ -270,7 +274,7 @@ ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
 
     r->upstream->peer.get = ngx_http_upstream_get_round_robin_peer;
     r->upstream->peer.free = ngx_http_upstream_free_round_robin_peer;
-    r->upstream->peer.tries = rrp->peers->number;
+    r->upstream->peer.tries = rrp->peers->number; // 设置为非backup服务器个数
 #if (NGX_HTTP_SSL)
     r->upstream->peer.set_session =
                                ngx_http_upstream_set_round_robin_peer_session;
@@ -387,7 +391,7 @@ ngx_http_upstream_create_round_robin_peer(ngx_http_request_t *r,
     return NGX_OK;
 }
 
-
+// 选择后端服务器处理请求，在ngx_event_connect_peer中被调用
 ngx_int_t
 ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
 {
@@ -433,7 +437,7 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
     } else {
 
         /* there are several peers */
-
+        // 从非backup的rs中选择一台
         peer = ngx_http_upstream_get_peer(rrp);
 
         if (peer == NULL) {
@@ -444,13 +448,13 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
                        "get rr peer, current: %ui %i",
                        rrp->current, peer->current_weight);
     }
-
+    // 成功选取到一台非backup服务器
     pc->sockaddr = peer->sockaddr;
     pc->socklen = peer->socklen;
     pc->name = &peer->name;
 
     /* ngx_unlock_mutex(rrp->peers->mutex); */
-
+    // tries == 1 表示尝试连接非backup后端服务器只剩最后一台，后面要尝试连接backup服务器
     if (pc->tries == 1 && rrp->peers->next) {
         pc->tries += rrp->peers->next->number;
     }
@@ -470,11 +474,12 @@ failed:
         rrp->peers = peers->next;
         pc->tries = rrp->peers->number;
 
+        // 设置backup服务器位图清0
         n = rrp->peers->number / (8 * sizeof(uintptr_t)) + 1;
         for (i = 0; i < n; i++) {
              rrp->tried[i] = 0;
         }
-
+        // 递归选取
         rc = ngx_http_upstream_get_round_robin_peer(pc, rrp);
 
         if (rc != NGX_BUSY) {
@@ -497,7 +502,7 @@ failed:
     return NGX_BUSY;
 }
 
-
+// 核心算法，根据权重选取某个peer
 static ngx_http_upstream_rr_peer_t *
 ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
 {
@@ -510,14 +515,14 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
     now = ngx_time();
 
     best = NULL;
-    total = 0;
+    total = 0;  // 所有权重有效值总和
 
     for (i = 0; i < rrp->peers->number; i++) {
 
         n = i / (8 * sizeof(uintptr_t));
         m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t));
 
-        if (rrp->tried[n] & m) {
+        if (rrp->tried[n] & m) { // 已经尝试过
             continue;
         }
 
@@ -526,7 +531,8 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
         if (peer->down) {
             continue;
         }
-
+        
+        // 周期时间内超过最大失败连接次数
         if (peer->max_fails
             && peer->fails >= peer->max_fails
             && now - peer->checked <= peer->fail_timeout)
@@ -534,7 +540,7 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
             continue;
         }
 
-        peer->current_weight += peer->effective_weight;
+        peer->current_weight += peer->effective_weight; // 增加当前权重
         total += peer->effective_weight;
 
         if (peer->effective_weight < peer->weight) {
@@ -557,9 +563,9 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
     n = i / (8 * sizeof(uintptr_t));
     m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t));
 
-    rrp->tried[n] |= m;
+    rrp->tried[n] |= m; // 标记已经尝试
 
-    best->current_weight -= total;
+    best->current_weight -= total; // 降低权重，原理参考https://www.codetd.com/article/147680
     best->checked = now;
 
     return best;

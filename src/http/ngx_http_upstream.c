@@ -3800,7 +3800,7 @@ ngx_http_upstream_addr_variable(ngx_http_request_t *r,
 
     len = 0;
     state = r->upstream_states->elts;
-
+    // 得到upstream所有peer地址的字符串
     for (i = 0; i < r->upstream_states->nelts; i++) {
         if (state[i].peer) {
             len += state[i].peer->len + 2;
@@ -3824,7 +3824,7 @@ ngx_http_upstream_addr_variable(ngx_http_request_t *r,
             p = ngx_cpymem(p, state[i].peer->data, state[i].peer->len);
         }
 
-        if (++i == r->upstream_states->nelts) {
+        if (++i == r->upstream_states->nelts) { // 最后一个
             break;
         }
 
@@ -3837,7 +3837,7 @@ ngx_http_upstream_addr_variable(ngx_http_request_t *r,
             *p++ = ':';
             *p++ = ' ';
 
-            if (++i == r->upstream_states->nelts) {
+            if (++i == r->upstream_states->nelts) { // 优化
                 break;
             }
 
@@ -4677,9 +4677,9 @@ ngx_http_upstream_init_main_conf(ngx_conf_t *cf, void *conf)
     ngx_http_upstream_srv_conf_t  **uscfp;
 
     uscfp = umcf->upstreams.elts;
-
+    // 初始化每个upstream
     for (i = 0; i < umcf->upstreams.nelts; i++) {
-
+        // 未设置负载均衡算法，默认为 round robin
         init = uscfp[i]->peer.init_upstream ? uscfp[i]->peer.init_upstream:
                                             ngx_http_upstream_init_round_robin;
 
