@@ -59,7 +59,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
         }
 
         peers = ngx_pcalloc(cf->pool, sizeof(ngx_http_upstream_rr_peers_t)
-                              + sizeof(ngx_http_upstream_rr_peer_t) * (n - 1));
+                              + sizeof(ngx_http_upstream_rr_peer_t) * (n - 1)); // n-1 因为ngx_http_upstream_rr_peers_t尾部已经有一个ngx_http_upstream_rr_peer_t
         if (peers == NULL) {
             return NGX_ERROR;
         }

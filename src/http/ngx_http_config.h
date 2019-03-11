@@ -15,7 +15,7 @@
 
 
 typedef struct {
-    // cf->ctx_index获得对应http模块配置
+    // cf->ctx_index获得http模块配置
     void        **main_conf;
     void        **srv_conf;
     void        **loc_conf;
@@ -25,17 +25,16 @@ typedef struct {
 typedef struct {
     // 解析配置前执行
     ngx_int_t   (*preconfiguration)(ngx_conf_t *cf);
-    // 解析完成配置后执行
-    ngx_int_t   (*postconfiguration)(ngx_conf_t *cf);
+    ngx_int_t   (*postconfiguration)(ngx_conf_t *cf); // 配置解析完成后调用
     // create_main_conf在ngx_http_module中ngx_http_block调用，用于创建http模块的配置上下文
     // 解析命令的时候
-    void       *(*create_main_conf)(ngx_conf_t *cf);
+    void       *(*create_main_conf)(ngx_conf_t *cf); // 返回值存储于ngx_http_conf_ctx_t.main_conf
     char       *(*init_main_conf)(ngx_conf_t *cf, void *conf);
 
-    void       *(*create_srv_conf)(ngx_conf_t *cf);
+    void       *(*create_srv_conf)(ngx_conf_t *cf); // 返回值存储于ngx_http_conf_ctx_t.srv_conf
     char       *(*merge_srv_conf)(ngx_conf_t *cf, void *prev, void *conf);
 
-    void       *(*create_loc_conf)(ngx_conf_t *cf);
+    void       *(*create_loc_conf)(ngx_conf_t *cf); // 返回值存储于ngx_http_conf_ctx_t.loc_conf
     char       *(*merge_loc_conf)(ngx_conf_t *cf, void *prev, void *conf);
 } ngx_http_module_t;
 

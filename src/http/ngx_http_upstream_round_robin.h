@@ -50,11 +50,11 @@ struct ngx_http_upstream_rr_peers_s {
     ngx_uint_t                      total_weight;
 
     unsigned                        single:1; // 只有一台非backup的rs
-    unsigned                        weighted:1;
+    unsigned                        weighted:1; // peer是否设置有weight
 
     ngx_str_t                      *name;
 
-    ngx_http_upstream_rr_peers_t   *next;
+    ngx_http_upstream_rr_peers_t   *next; // round robin算法指向backup server
 
     ngx_http_upstream_rr_peer_t     peer[1];
 };

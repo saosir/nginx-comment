@@ -370,6 +370,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
             conf = NULL;
 
             if (cmd->type & NGX_DIRECT_CONF) {
+                // 指令类型，conf
                 conf = ((void **) cf->ctx)[ngx_modules[i]->index];
 
             } else if (cmd->type & NGX_MAIN_CONF) {
@@ -382,7 +383,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
                 confp = *(void **) ((char *) cf->ctx + cmd->conf);
 
                 if (confp) {
-                    conf = confp[ngx_modules[i]->ctx_index];
+                    conf = confp[ngx_modules[i]->ctx_index]; // 二级模块
                 }
             }
 

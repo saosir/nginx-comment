@@ -78,8 +78,17 @@
 struct ngx_command_s {
     ngx_str_t             name;
     ngx_uint_t            type; // 命令类型，会与ngx_conf_t.cmd_type做与运算
+    // type 含有 NGX_DIRECT_CONF，set回调函数的conf参数为配置上下文指针，core模块由ngx_core_module_t.create_conf创建返回
+    //      (void*)conf + ngx_command_s.offset 为解析命令后需要修改的配置项，参考ngx_conf_set_flag_slot函数以及nginx.c中
+    //      daemon命令的解析
+    // type 含有 NGX_MAIN_CONF 类型是否 conf 为模块上下文，conf为模块上下文指针，可以对指针指向的值进行修改，有些模块需要
+    //      解析到响应指令才会创建模块上下文，如http模块解析到http指令时候创建模块上下文ngx_http_conf_ctx_t,参考ngx_http_block
+    // type 不含有上面两个值，为指定模块创建的配置上下文，比如http_realip模块中conf为ngx_http_realip_create_loc_conf创建
     char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+    // http模块用到这个字段，可以为NGX_HTTP_MAIN_CONF_OFFSET、NGX_HTTP_SRV_CONF_OFFSET、NGX_HTTP_LOC_CONF_OFFSET，表示当
+    // 前指令的配置存储于ngx_http_conf_ctx_t哪个数组中，通过cf->ctx_index得到http模块存储于数组中的哪个配置
     ngx_uint_t            conf;
+    // 一般情况表示为set回调函数conf参数的加上offset偏移，即为当前配置命令需要修改的配置项
     ngx_uint_t            offset;
     void                 *post;
 };

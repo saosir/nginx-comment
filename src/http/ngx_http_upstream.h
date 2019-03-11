@@ -111,7 +111,7 @@ struct ngx_http_upstream_srv_conf_s {
     // upstream.server命令解析参数
     ngx_array_t                     *servers;  /* ngx_http_upstream_server_t */
 
-    ngx_uint_t                       flags;
+    ngx_uint_t                       flags; // upstream支持的功能
     ngx_str_t                        host;
     u_char                          *file_name;
     ngx_uint_t                       line;

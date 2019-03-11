@@ -4132,7 +4132,7 @@ ngx_http_upstream(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
         return NGX_CONF_ERROR;
     }
 
-    ctx->srv_conf[ngx_http_upstream_module.ctx_index] = uscf;
+    ctx->srv_conf[ngx_http_upstream_module.ctx_index] = uscf; // 在upstream.server命令中的conf参数
 
     uscf->srv_conf = ctx->srv_conf;
 
@@ -4207,7 +4207,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_uint_t                   i;
     ngx_http_upstream_server_t  *us;
 
-    if (uscf->servers == NULL) {
+    if (uscf->servers == NULL) { // 在upstream块中第一次解析到server命令
         uscf->servers = ngx_array_create(cf->pool, 4,
                                          sizeof(ngx_http_upstream_server_t));
         if (uscf->servers == NULL) {
@@ -4228,7 +4228,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     u.url = value[1];
     u.default_port = 80;
-
+    // 解析upstream.server得到ip地址
     if (ngx_parse_url(cf->pool, &u) != NGX_OK) {
         if (u.err) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
@@ -4367,6 +4367,7 @@ ngx_http_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
             continue;
         }
 
+        // upstream 已存在
         if ((flags & NGX_HTTP_UPSTREAM_CREATE)
              && (uscfp[i]->flags & NGX_HTTP_UPSTREAM_CREATE))
         {
@@ -4678,6 +4679,7 @@ ngx_http_upstream_init_main_conf(ngx_conf_t *cf, void *conf)
 
     uscfp = umcf->upstreams.elts;
     // 初始化每个upstream
+    // 对每个upstream进行初始化
     for (i = 0; i < umcf->upstreams.nelts; i++) {
         // 未设置负载均衡算法，默认为 round robin
         init = uscfp[i]->peer.init_upstream ? uscfp[i]->peer.init_upstream:

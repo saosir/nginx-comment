@@ -2749,7 +2749,7 @@ ngx_http_get_forwarded_addr(ngx_http_request_t *r, ngx_addr_t *addr,
         }
     }
 #endif
-
+    // 只处理来自信任代理的请求
     for (cidr = proxies->elts, i = 0; i < proxies->nelts; i++) {
         if (cidr[i].family != family) {
             goto next;
@@ -2780,7 +2780,7 @@ ngx_http_get_forwarded_addr(ngx_http_request_t *r, ngx_addr_t *addr,
             }
             break;
         }
-
+        // 从尾部开始
         for (p = xff + xfflen - 1; p > xff; p--, xfflen--) {
             if (*p != ' ' && *p != ',') {
                 break;

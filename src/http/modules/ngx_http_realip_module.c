@@ -28,8 +28,8 @@ typedef struct {
 
 
 typedef struct {
-    ngx_connection_t  *connection;
-    struct sockaddr   *sockaddr;
+    ngx_connection_t  *connection; // http请求的四层连接
+    struct sockaddr   *sockaddr; // 原始连接的源地址
     socklen_t          socklen;
     ngx_str_t          addr_text;
 } ngx_http_realip_ctx_t;
@@ -47,6 +47,7 @@ static char *ngx_http_realip_merge_loc_conf(ngx_conf_t *cf,
     void *parent, void *child);
 static ngx_int_t ngx_http_realip_init(ngx_conf_t *cf);
 
+// 参考https://www.hi-linux.com/posts/53006.html
 
 static ngx_command_t  ngx_http_realip_commands[] = {
 
@@ -132,7 +133,7 @@ ngx_http_realip_handler(ngx_http_request_t *r)
     if (rlcf->from == NULL) {
         return NGX_DECLINED;
     }
-
+    // 代理将真实客户端ip地址存储于http头部
     // 从real_ip_header指定的头部中取得真实客户端ip
     switch (rlcf->type) {
 
@@ -194,7 +195,7 @@ ngx_http_realip_handler(ngx_http_request_t *r)
     }
 
 found:
-    // 修改 r-connection中客户端的ip地址
+    // http头部找到真是客户端ip
     c = r->connection;
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "realip: \"%s\"", ip);
@@ -213,7 +214,7 @@ found:
     return NGX_DECLINED;
 }
 
-
+// 修改请求四层连接中客户端ip地址
 static ngx_int_t
 ngx_http_realip_set_addr(ngx_http_request_t *r, ngx_addr_t *addr)
 {
@@ -247,12 +248,12 @@ ngx_http_realip_set_addr(ngx_http_request_t *r, ngx_addr_t *addr)
     ngx_memcpy(p, text, len);
 
     cln->handler = ngx_http_realip_cleanup;
-
+    // 保存原始连接内容
     ctx->connection = c;
     ctx->sockaddr = c->sockaddr;
     ctx->socklen = c->socklen;
     ctx->addr_text = c->addr_text;
-
+    // 修改当前http请求的源地址
     c->sockaddr = addr->sockaddr;
     c->socklen = addr->socklen;
     c->addr_text.len = len;
@@ -265,6 +266,7 @@ ngx_http_realip_set_addr(ngx_http_request_t *r, ngx_addr_t *addr)
 static void
 ngx_http_realip_cleanup(void *data)
 {
+    // 回复原始连接的客户端地址
     ngx_http_realip_ctx_t *ctx = data;
 
     ngx_connection_t  *c;

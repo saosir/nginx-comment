@@ -64,7 +64,7 @@ static ngx_http_module_t  ngx_http_upstream_least_conn_module_ctx = {
     NULL                                   /* merge location configuration */
 };
 
-
+// upstream 子模块，提供least_conn负载均衡算法
 ngx_module_t  ngx_http_upstream_least_conn_module = {
     NGX_MODULE_V1,
     &ngx_http_upstream_least_conn_module_ctx, /* module context */
