@@ -504,6 +504,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
         u->request_bufs = r->request_body->bufs;
     }
 
+    // proxy、uwsgi、fastcgi有不同的create_request
     if (u->create_request(r) != NGX_OK) {
         ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
         return;
@@ -543,6 +544,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
         ngx_memzero(u->state, sizeof(ngx_http_upstream_state_t));
     }
 
+    // 为request添加cleanup回调
     cln = ngx_http_cleanup_add(r, 0);
     if (cln == NULL) {
         ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
@@ -579,11 +581,11 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
         umcf = ngx_http_get_module_main_conf(r, ngx_http_upstream_module);
 
         uscfp = umcf->upstreams.elts;
-
+        // 检索每个upstream
         for (i = 0; i < umcf->upstreams.nelts; i++) {
 
             uscf = uscfp[i];
-
+            // 是否与upstream的host相同
             if (uscf->host.len == host->len
                 && ((uscf->port == 0 && u->resolved->no_port)
                      || uscf->port == u->resolved->port)
@@ -638,7 +640,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
 
 found:
 
-    if (uscf->peer.init(r, uscf) != NGX_OK) {
+    if (uscf->peer.init(r, uscf) != NGX_OK) { // init函数默认为ngx_http_upstream_init_round_robin_peer
         ngx_http_upstream_finalize_request(r, u,
                                            NGX_HTTP_INTERNAL_SERVER_ERROR);
         return;
@@ -4134,7 +4136,7 @@ ngx_http_upstream(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
         return NGX_CONF_ERROR;
     }
 
-    ctx->srv_conf[ngx_http_upstream_module.ctx_index] = uscf; // 在upstream.server命令中的conf参数
+    ctx->srv_conf[ngx_http_upstream_module.ctx_index] = uscf;
 
     uscf->srv_conf = ctx->srv_conf;
 

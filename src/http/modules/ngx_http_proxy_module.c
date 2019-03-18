@@ -40,7 +40,7 @@ typedef struct {
 
 
 typedef struct {
-    ngx_http_upstream_conf_t       upstream;
+    ngx_http_upstream_conf_t       upstream; // proxy upstream配置如 proxy_read_timeout/
 
     ngx_array_t                   *flushes;
     ngx_array_t                   *body_set_len;
@@ -914,7 +914,7 @@ ngx_http_proxy_create_key(ngx_http_request_t *r)
 
 #endif
 
-
+// 根据proxy配置，组装发送给下游的请求
 static ngx_int_t
 ngx_http_proxy_create_request(ngx_http_request_t *r)
 {
@@ -1184,7 +1184,7 @@ ngx_http_proxy_create_request(ngx_http_request_t *r)
         }
     }
 
-
+    // 头部发送完毕
     /* add "\r\n" at the header end */
     *b->last++ = CR; *b->last++ = LF;
 

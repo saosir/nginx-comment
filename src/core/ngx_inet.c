@@ -13,7 +13,7 @@ static ngx_int_t ngx_parse_unix_domain_url(ngx_pool_t *pool, ngx_url_t *u);
 static ngx_int_t ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u);
 static ngx_int_t ngx_parse_inet6_url(ngx_pool_t *pool, ngx_url_t *u);
 
-
+// ip文本地址转整形
 in_addr_t
 ngx_inet_addr(u_char *text, size_t len)
 {

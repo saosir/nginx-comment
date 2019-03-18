@@ -27,7 +27,7 @@ typedef struct {
     time_t                          accessed;
     time_t                          checked; // 最后一次尝试连接时间
 
-    ngx_uint_t                      max_fails;
+    ngx_uint_t                      max_fails; // 默认0无限制
     time_t                          fail_timeout;
 
     ngx_uint_t                      down;          /* unsigned  down:1; */

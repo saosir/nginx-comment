@@ -369,7 +369,7 @@ struct ngx_http_request_s {
 #endif
 
     ngx_http_upstream_t              *upstream;
-    ngx_array_t                      *upstream_states;
+    ngx_array_t                      *upstream_states; //ngx_http_upstream_state_t
                                          /* of ngx_http_upstream_state_t */
 
     ngx_pool_t                       *pool;

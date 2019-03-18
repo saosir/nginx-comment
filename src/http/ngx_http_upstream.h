@@ -64,8 +64,8 @@ typedef struct {
 
 
 typedef struct {
-    ngx_hash_t                       headers_in_hash;
-    ngx_array_t                      upstreams;
+    ngx_hash_t                       headers_in_hash; //ngx_http_upstream_headers_in hash表
+    ngx_array_t                      upstreams; // ngx_http_upstream_srv_conf_t 数组，保存配置文件中解析到的upstream
                                              /* ngx_http_upstream_srv_conf_t */
 } ngx_http_upstream_main_conf_t;
 
@@ -78,8 +78,8 @@ typedef ngx_int_t (*ngx_http_upstream_init_peer_pt)(ngx_http_request_t *r,
 
 
 typedef struct {
-    ngx_http_upstream_init_pt        init_upstream;
-    ngx_http_upstream_init_peer_pt   init;
+    ngx_http_upstream_init_pt        init_upstream; // 指向负载均衡策略初始化函数，least_conn和ip_hash指令设置
+    ngx_http_upstream_init_peer_pt   init; // http请求到来之后在ngx_http_upstream_init_request中被调用
     void                            *data;
 } ngx_http_upstream_peer_t;
 
@@ -158,7 +158,7 @@ typedef struct {
     ngx_array_t                     *hide_headers;
     ngx_array_t                     *pass_headers;
 
-    ngx_addr_t                      *local;
+    ngx_addr_t                      *local; // proxy_bind
 
 #if (NGX_HTTP_CACHE)
     ngx_shm_zone_t                  *cache;
@@ -267,7 +267,7 @@ struct ngx_http_upstream_s {
 
     ngx_event_pipe_t                *pipe;
 
-    ngx_chain_t                     *request_bufs;
+    ngx_chain_t                     *request_bufs; // 客户端发送的body
 
     ngx_output_chain_ctx_t           output;
     ngx_chain_writer_ctx_t           writer;
@@ -276,7 +276,7 @@ struct ngx_http_upstream_s {
 
     ngx_http_upstream_headers_in_t   headers_in;
 
-    ngx_http_upstream_resolved_t    *resolved;
+    ngx_http_upstream_resolved_t    *resolved; // 已解析到的upstream地址
 
     ngx_buf_t                        buffer;
     off_t                            length;

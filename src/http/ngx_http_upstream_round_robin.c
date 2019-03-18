@@ -36,6 +36,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
 
     us->peer.init = ngx_http_upstream_init_round_robin_peer;
 
+    // 设置所有servers
     if (us->servers) {
         server = us->servers->elts;
 
@@ -216,6 +217,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
 }
 
 
+// 根据权重排序
 static ngx_int_t
 ngx_http_upstream_cmp_servers(const void *one, const void *two)
 {
