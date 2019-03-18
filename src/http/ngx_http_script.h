@@ -15,7 +15,7 @@
 
 
 typedef struct {
-    u_char                     *ip;
+    u_char                     *ip; // 读取的内存指针
     u_char                     *pos;
     ngx_http_variable_value_t  *sp;
 

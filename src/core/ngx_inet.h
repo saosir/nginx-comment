@@ -70,7 +70,7 @@ typedef struct {
 typedef struct {
     struct sockaddr          *sockaddr;
     socklen_t                 socklen;
-    ngx_str_t                 name;
+    ngx_str_t                 name; // host
 } ngx_addr_t;
 
 
@@ -86,7 +86,7 @@ typedef struct {
 
     unsigned                  listen:1;
     unsigned                  uri_part:1;
-    unsigned                  no_resolve:1;
+    unsigned                  no_resolve:1; // 标识不用解析host
     unsigned                  one_addr:1;
 
     unsigned                  no_port:1;

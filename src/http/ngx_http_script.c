@@ -730,9 +730,9 @@ ngx_http_script_copy_len_code(ngx_http_script_engine_t *e)
 
     code = (ngx_http_script_copy_code_t *) e->ip;
 
-    e->ip += sizeof(ngx_http_script_copy_code_t);
+    e->ip += sizeof(ngx_http_script_copy_code_t); // 偏移长度
 
-    return code->len;
+    return code->len; // 返回长度
 }
 
 

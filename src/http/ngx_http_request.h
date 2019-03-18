@@ -354,9 +354,9 @@ typedef void (*ngx_http_event_handler_pt)(ngx_http_request_t *r);
 struct ngx_http_request_s {
     uint32_t                          signature;         /* "HTTP" */
 
-    ngx_connection_t                 *connection;
+    ngx_connection_t                 *connection; // 4层连接
 
-    void                            **ctx;
+    void                            **ctx; // 每个模块的上下文信息，如ngx_http_proxy_ctx_t
     void                            **main_conf;
     void                            **srv_conf;
     void                            **loc_conf; // 命中的location，ngx_http_core_find_location查找得到
@@ -406,7 +406,7 @@ struct ngx_http_request_s {
     ngx_http_virtual_names_t         *virtual_names;
 
     ngx_int_t                         phase_handler;
-    ngx_http_handler_pt               content_handler;
+    ngx_http_handler_pt               content_handler; // 结果返回，如通过proxy_pass设置的ngx_http_proxy_handler
     ngx_uint_t                        access_code;
 
     ngx_http_variable_value_t        *variables;

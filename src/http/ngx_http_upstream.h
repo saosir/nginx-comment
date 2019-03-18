@@ -287,7 +287,7 @@ struct ngx_http_upstream_s {
 
     ngx_int_t                      (*input_filter_init)(void *data);
     ngx_int_t                      (*input_filter)(void *data, ssize_t bytes);
-    void                            *input_filter_ctx;
+    void                            *input_filter_ctx; // 传递 给input_filter 的 data 参数
 
 #if (NGX_HTTP_CACHE)
     ngx_int_t                      (*create_key)(ngx_http_request_t *r);

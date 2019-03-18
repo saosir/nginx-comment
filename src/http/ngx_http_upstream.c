@@ -389,11 +389,13 @@ ngx_http_upstream_create(ngx_http_request_t *r)
 
     u = r->upstream;
 
+    // 如果请求已经存在upstream，先释放upstream
     if (u && u->cleanup) {
         r->main->count++;
         ngx_http_upstream_cleanup(r);
     }
 
+    // 新建upstream
     u = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_t));
     if (u == NULL) {
         return NGX_ERROR;
@@ -416,7 +418,7 @@ ngx_http_upstream_create(ngx_http_request_t *r)
     return NGX_OK;
 }
 
-
+// proxy模块中，读取完http body后回调
 void
 ngx_http_upstream_init(ngx_http_request_t *r)
 {
@@ -427,7 +429,7 @@ ngx_http_upstream_init(ngx_http_request_t *r)
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http init upstream, client timer: %d", c->read->timer_set);
 
-    if (c->read->timer_set) {
+    if (c->read->timer_set) { // 删除读超时
         ngx_del_timer(c->read);
     }
 
@@ -4333,7 +4335,7 @@ invalid:
     return NGX_CONF_ERROR;
 }
 
-
+// 先从upstream列表中找到一个已存在的，如果没有则创建一个，flag=0一般用在proxy_pass指令
 ngx_http_upstream_srv_conf_t *
 ngx_http_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
 {
@@ -4421,7 +4423,7 @@ ngx_http_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags)
     uscf->port = u->port;
     uscf->default_port = u->default_port;
 
-    if (u->naddrs == 1) {
+    if (u->naddrs == 1) { // proxy_pass http://localhost:8080 这种情况
         uscf->servers = ngx_array_create(cf->pool, 1,
                                          sizeof(ngx_http_upstream_server_t));
         if (uscf->servers == NULL) {
@@ -4678,7 +4680,7 @@ ngx_http_upstream_init_main_conf(ngx_conf_t *cf, void *conf)
     ngx_http_upstream_srv_conf_t  **uscfp;
 
     uscfp = umcf->upstreams.elts;
-    // 初始化每个upstream
+    
     // 对每个upstream进行初始化
     for (i = 0; i < umcf->upstreams.nelts; i++) {
         // 未设置负载均衡算法，默认为 round robin

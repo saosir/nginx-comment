@@ -466,6 +466,7 @@ ngx_http_init_request(ngx_event_t *rev)
         return;
     }
 
+    // 预先分配好每个http模块的上下文数组
     r->ctx = ngx_pcalloc(r->pool, sizeof(void *) * ngx_http_max_module);
     if (r->ctx == NULL) {
         ngx_destroy_pool(r->pool);

@@ -32,7 +32,7 @@ struct ngx_http_proxy_rewrite_s {
 
 typedef struct {
     ngx_str_t                      key_start;
-    ngx_str_t                      schema;
+    ngx_str_t                      schema; // http 或 https
     ngx_str_t                      host_header;
     ngx_str_t                      port;
     ngx_str_t                      uri;
@@ -51,6 +51,7 @@ typedef struct {
 
     ngx_array_t                   *headers_source;
 
+    // 如果proxy_pass指令后面存在变量，下面两个字段非空
     ngx_array_t                   *proxy_lengths;
     ngx_array_t                   *proxy_values;
 
@@ -637,6 +638,7 @@ ngx_http_proxy_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
+    // 设置http_request的http_proxy模块上下文
     ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_proxy_ctx_t));
     if (ctx == NULL) {
         return NGX_ERROR;
@@ -795,7 +797,7 @@ ngx_http_proxy_eval(ngx_http_request_t *r, ngx_http_proxy_ctx_t *ctx,
     if (u->resolved == NULL) {
         return NGX_ERROR;
     }
-
+    // 取解析到的第一个地址
     if (url.addrs && url.addrs[0].sockaddr) {
         u->resolved->sockaddr = url.addrs[0].sockaddr;
         u->resolved->socklen = url.addrs[0].socklen;
@@ -3075,6 +3077,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
     ngx_http_script_compile_t     sc;
     ngx_http_script_copy_code_t  *copy;
 
+    // loc 未设置 proxy_header_set
     if (conf->headers_source == NULL) {
         conf->flushes = prev->flushes;
         conf->headers_set_len = prev->headers_set_len;
@@ -3136,6 +3139,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
 
 #endif
 
+    // headers_source 拷贝到 headers_merged
     src = conf->headers_source->elts;
     for (i = 0; i < conf->headers_source->nelts; i++) {
 
@@ -3147,9 +3151,11 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
         *s = src[i];
     }
 
+    // 确保ngx_http_proxy_headers在headers_merged都存在
     while (h->key.len) {
 
         src = headers_merged.elts;
+        // 遍历headers_merged确认h->key是否已经存在
         for (i = 0; i < headers_merged.nelts; i++) {
             if (ngx_strcasecmp(h->key.data, src[i].key.data) == 0) {
                 goto next;
@@ -3178,7 +3184,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
         ngx_str_set(&s->value, "$proxy_internal_body_length");
     }
 
-
+    // 将 headers_merged 序列化存储到 headers_set_len 和 headers_set，将key放入 headers_names 中
     src = headers_merged.elts;
     for (i = 0; i < headers_merged.nelts; i++) {
 
@@ -3195,7 +3201,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
             continue;
         }
 
-        if (ngx_http_script_variables_count(&src[i].value) == 0) {
+        if (ngx_http_script_variables_count(&src[i].value) == 0) { // 无变量
             copy = ngx_array_push_n(conf->headers_set_len,
                                     sizeof(ngx_http_script_copy_code_t));
             if (copy == NULL) {
@@ -3212,7 +3218,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
                        + src[i].key.len + sizeof(": ") - 1
                        + src[i].value.len + sizeof(CRLF) - 1
                        + sizeof(uintptr_t) - 1)
-                    & ~(sizeof(uintptr_t) - 1);
+                    & ~(sizeof(uintptr_t) - 1); // 向上取整
 
             copy = ngx_array_push_n(conf->headers_set, size);
             if (copy == NULL) {
@@ -3364,7 +3370,7 @@ ngx_http_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     url = &value[1];
 
     n = ngx_http_script_variables_count(url);
-
+    // proxy_pass指令后存在变量
     if (n) {
 
         ngx_memzero(&sc, sizeof(ngx_http_script_compile_t));
@@ -3416,7 +3422,7 @@ ngx_http_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ngx_memzero(&u, sizeof(ngx_url_t));
 
-    u.url.len = url->len - add;
+    u.url.len = url->len - add; // 忽略 前面协议内容
     u.url.data = url->data + add;
     u.default_port = port;
     u.uri_part = 1;

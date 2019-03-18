@@ -99,7 +99,7 @@ ngx_array_push(ngx_array_t *a)
     return elt;
 }
 
-
+// 连续push多个元素
 void *
 ngx_array_push_n(ngx_array_t *a, ngx_uint_t n)
 {
