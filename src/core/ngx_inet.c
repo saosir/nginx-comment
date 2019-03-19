@@ -627,6 +627,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
 
     last = host + u->url.len;
 
+    // 端口起始点
     port = ngx_strlchr(host, last, ':');
 
     uri = ngx_strlchr(host, last, '/');
@@ -648,7 +649,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
         u->uri.len = last - uri;
         u->uri.data = uri;
 
-        last = uri;
+        last = uri; //修改last，为后面解析port
 
         if (uri < port) {
             port = NULL;
@@ -656,7 +657,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
     }
 
     if (port) {
-        port++;
+        port++;// 跨过冒号
 
         len = last - port;
 
@@ -681,7 +682,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
             if (u->listen) {
 
                 /* test value as port only */
-
+                // 只有一个端口
                 n = ngx_atoi(host, last - host);
 
                 if (n != NGX_ERROR) {
@@ -728,7 +729,7 @@ ngx_parse_inet_url(ngx_pool_t *pool, ngx_url_t *u)
     if (len) {
         sin->sin_addr.s_addr = ngx_inet_addr(host, len);
 
-        if (sin->sin_addr.s_addr == INADDR_NONE) {
+        if (sin->sin_addr.s_addr == INADDR_NONE) { // 非ip格式，可能为域名如www.google.com
             p = ngx_alloc(++len, pool->log);
             if (p == NULL) {
                 return NGX_ERROR;
@@ -897,7 +898,7 @@ ngx_parse_inet6_url(ngx_pool_t *pool, ngx_url_t *u)
 #endif
 }
 
-
+// 解析host得到全部的ip地址
 ngx_int_t
 ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
 {
@@ -947,7 +948,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
         }
 
         u->naddrs = i;
-
+        // 保存解析到的所有ip地址列表
         for (i = 0; i < u->naddrs; i++) {
 
             sin = ngx_pcalloc(pool, sizeof(struct sockaddr_in));
@@ -978,7 +979,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
     } else {
 
         /* MP: ngx_shared_palloc() */
-
+        // 环回地址，只需要分配一个即可
         u->addrs = ngx_pcalloc(pool, sizeof(ngx_addr_t));
         if (u->addrs == NULL) {
             return NGX_ERROR;

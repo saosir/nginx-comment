@@ -44,7 +44,7 @@ static ngx_uint_t     ngx_event_max_module;
 ngx_uint_t            ngx_event_flags;
 ngx_event_actions_t   ngx_event_actions; // 在event模块与os相关的io模型模块中的init函数中初始化，如ngx_epoll_module模块的ngx_epoll_init函数
 
-
+// nginx处理的连接总数，包括accept客户端，连接upstream
 static ngx_atomic_t   connection_counter = 1;
 ngx_atomic_t         *ngx_connection_counter = &connection_counter;
 
@@ -747,7 +747,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 #endif
     }
 
-    i = cycle->connection_n;
+    i = cycle->connection_n; // 根据worker最大连接数创建空闲连接
     next = NULL;
     // 串联为链表保存于free_connections
     do {

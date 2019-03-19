@@ -54,7 +54,7 @@ struct ngx_event_s {
     unsigned         disabled:1;
 
     /* the ready event; in aio mode 0 means that no operation can be posted */
-    unsigned         ready:1;
+    unsigned         ready:1; // 事件就绪
 
     unsigned         oneshot:1;
 
@@ -453,6 +453,7 @@ extern ngx_event_actions_t   ngx_event_actions;
 #define ngx_del_timer        ngx_event_del_timer
 
 
+// 由epoll select aio其中一个模块设置
 extern ngx_os_io_t  ngx_io;
 
 #define ngx_recv             ngx_io.recv

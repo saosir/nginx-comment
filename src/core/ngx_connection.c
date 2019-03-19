@@ -752,6 +752,7 @@ ngx_close_listening_sockets(ngx_cycle_t *cycle)
 }
 
 
+// 申请一个ngx_connection_t结构体
 ngx_connection_t *
 ngx_get_connection(ngx_socket_t s, ngx_log_t *log)
 {

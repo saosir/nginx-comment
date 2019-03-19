@@ -21,8 +21,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     ngx_socket_t       s;
     ngx_event_t       *rev, *wev;
     ngx_connection_t  *c;
-
-    rc = pc->get(pc, pc->data);
+    // 会设置pc->sockaddr
+    rc = pc->get(pc, pc->data); // 获取upstream的peer地址
     if (rc != NGX_OK) {
         return rc;
     }
@@ -220,11 +220,12 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
         event = NGX_LEVEL_EVENT;
     }
-
+    // 监听读事件
     if (ngx_add_event(rev, NGX_READ_EVENT, event) != NGX_OK) {
         goto failed;
     }
 
+    // connect未连接成功
     if (rc == -1) {
 
         /* NGX_EINPROGRESS */
@@ -235,7 +236,7 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
         return NGX_AGAIN;
     }
-
+    // 连接成功
     ngx_log_debug0(NGX_LOG_DEBUG_EVENT, pc->log, 0, "connected");
 
     wev->ready = 1;

@@ -73,27 +73,28 @@ typedef struct {
     ngx_str_t                 name; // host
 } ngx_addr_t;
 
-
+// 设置url之后就可以直接调用ngx_parse_url进行解析
 typedef struct {
     ngx_str_t                 url;
     ngx_str_t                 host;
-    ngx_str_t                 port_text;
+    ngx_str_t                 port_text; // 端口的文本内容，引用url端口部分
     ngx_str_t                 uri;
 
     in_port_t                 port;
     in_port_t                 default_port;
     int                       family;
 
-    unsigned                  listen:1;
+    unsigned                  listen:1; // 是否为监听地址，如果不是监听地址，需要解析host得到全部的ip地址
     unsigned                  uri_part:1;
     unsigned                  no_resolve:1; // 标识不用解析host
     unsigned                  one_addr:1;
 
-    unsigned                  no_port:1;
-    unsigned                  wildcard:1;
+    unsigned                  no_port:1; // url是否有端口，如果为1，port会被设置为default_port
+    unsigned                  wildcard:1; // host如果为空设置为1
 
+    // 用于作为监听地址的情况
     socklen_t                 socklen;
-    u_char                    sockaddr[NGX_SOCKADDRLEN];
+    u_char                    sockaddr[NGX_SOCKADDRLEN]; // host为ip的话，设置为数字格式，如果为域名解析得到的ip地址取第一个，如果host为空则为INADDR_ANY
 
     ngx_addr_t               *addrs;
     ngx_uint_t                naddrs;

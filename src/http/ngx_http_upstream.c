@@ -4232,7 +4232,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     u.url = value[1];
     u.default_port = 80;
-    // 解析upstream.server得到ip地址
+    // 解析upstream.server得到ip地址，如果解析不到域名的ip地址会报错
     if (ngx_parse_url(cf->pool, &u) != NGX_OK) {
         if (u.err) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,

@@ -59,7 +59,7 @@ struct ngx_peer_connection_s {
 
     ngx_addr_t                      *local;
 
-    int                              rcvbuf;
+    int                              rcvbuf; // socket接收窗口大小
 
     ngx_log_t                       *log;
 
