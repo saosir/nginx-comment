@@ -616,7 +616,7 @@ ngx_chain_writer(void *data, ngx_chain_t *in)
             ngx_debug_point();
         }
 #endif
-
+        // 计算in链表所有buf大小
         size += ngx_buf_size(in->buf);
 
         ngx_log_debug2(NGX_LOG_DEBUG_CORE, c->log, 0,

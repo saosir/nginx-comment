@@ -375,7 +375,7 @@ struct ngx_http_request_s {
     ngx_pool_t                       *pool;
     ngx_buf_t                        *header_in;
 
-    ngx_http_headers_in_t             headers_in;
+    ngx_http_headers_in_t             headers_in; // 客户端发送过来的http头
     ngx_http_headers_out_t            headers_out;
 
     ngx_http_request_body_t          *request_body;

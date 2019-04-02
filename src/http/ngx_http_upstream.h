@@ -145,8 +145,8 @@ typedef struct {
     ngx_uint_t                       next_upstream;
     ngx_uint_t                       store_access;
     ngx_flag_t                       buffering;
-    ngx_flag_t                       pass_request_headers;
-    ngx_flag_t                       pass_request_body;
+    ngx_flag_t                       pass_request_headers; // 是否传递客户端的http头
+    ngx_flag_t                       pass_request_body; // 是否传递body给upstream
 
     ngx_flag_t                       ignore_client_abort;
     ngx_flag_t                       intercept_errors;
@@ -154,10 +154,9 @@ typedef struct {
 
     ngx_path_t                      *temp_path;
 
-    ngx_hash_t                       hide_headers_hash;
+    ngx_hash_t                       hide_headers_hash; // proxy_hide_header
     ngx_array_t                     *hide_headers;
-    ngx_array_t                     *pass_headers;
-
+    ngx_array_t                     *pass_headers; // proxy_pass_header 需要传递哪些从代理服务器返回的http头到client，优先级比hid_headers大
     ngx_addr_t                      *local; // proxy_bind
 
 #if (NGX_HTTP_CACHE)

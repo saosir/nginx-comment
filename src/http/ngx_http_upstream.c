@@ -381,7 +381,7 @@ ngx_conf_bitmask_t  ngx_http_upstream_ignore_headers_masks[] = {
     { ngx_null_string, 0 }
 };
 
-
+// 分配内存为ngx_http_request_t创建upstream
 ngx_int_t
 ngx_http_upstream_create(ngx_http_request_t *r)
 {
@@ -523,6 +523,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
 
     u->writer.pool = r->pool;
 
+    // upstream 状态
     if (r->upstream_states == NULL) {
 
         r->upstream_states = ngx_array_create(r->pool, 1,
@@ -1092,6 +1093,7 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
 }
 
 
+// 连接upstream服务器
 static void
 ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
 {
@@ -1122,6 +1124,7 @@ ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
     u->state->response_sec = tp->sec;
     u->state->response_msec = tp->msec;
 
+    // 建立4层连接
     rc = ngx_event_connect_peer(&u->peer);
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
@@ -4622,7 +4625,7 @@ ngx_http_upstream_hide_headers_hash(ngx_conf_t *cf,
 
         h = conf->pass_headers->elts;
         hk = hide_headers.elts;
-
+        // 如果pass_headers的头部存在于hide_headers，则从hide_headers剔除
         for (i = 0; i < conf->pass_headers->nelts; i++) {
             for (j = 0; j < hide_headers.nelts; j++) {
 

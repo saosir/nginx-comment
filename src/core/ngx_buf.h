@@ -244,7 +244,7 @@ struct ngx_output_chain_ctx_s {
     ngx_buf_tag_t                tag;
 
     ngx_output_chain_filter_pt   output_filter;
-    void                        *filter_ctx;
+    void                        *filter_ctx; // 传递给output_filter的参数
 };
 
 

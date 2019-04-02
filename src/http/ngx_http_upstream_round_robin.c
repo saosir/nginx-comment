@@ -36,7 +36,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
 
     us->peer.init = ngx_http_upstream_init_round_robin_peer;
 
-    // 设置所有servers
+    // 设置所有upstream.servers
     if (us->servers) {
         server = us->servers->elts;
 
@@ -230,9 +230,9 @@ ngx_http_upstream_cmp_servers(const void *one, const void *two)
 }
 
 
-// nginx接受客户端请求，调用ngx_http_upstream_init_request函数初始化请求过程中
-// 调用uscf->peer.init(r, uscf)，uscf->peer.init指向的函数就是ngx_http_upstream_init_round_robin_peer
-// 在ngx_http_upstream_init_round_robin进行设置
+// 调用ngx_http_upstream_init_request函数初始化请求过程中
+// 调用uscf->peer.init(r, uscf)，uscf->peer.init指向gx_http_upstream_init_round_robin_peer
+// 在ngx_http_upstream_init_round_robin进行设置uscf->peer.init
 ngx_int_t
 ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
     ngx_http_upstream_srv_conf_t *us)

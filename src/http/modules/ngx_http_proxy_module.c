@@ -47,9 +47,8 @@ typedef struct {
     ngx_array_t                   *body_set;
     ngx_array_t                   *headers_set_len;
     ngx_array_t                   *headers_set;
-    ngx_hash_t                     headers_set_hash;
-
-    ngx_array_t                   *headers_source;
+    ngx_hash_t                     headers_set_hash; // 需要传递到upstream的所有http头部名称的hash表
+    ngx_array_t                   *headers_source; // 通过proxy_set_header设置的http头
 
     // 如果proxy_pass指令后面存在变量，下面两个字段非空
     ngx_array_t                   *proxy_lengths;
@@ -957,7 +956,7 @@ ngx_http_proxy_create_request(ngx_http_request_t *r)
     {
         ctx->head = 1;
     }
-
+    // 计算发送给upstream请求需要的内存大小
     len = method.len + sizeof(ngx_http_proxy_version) - 1 + sizeof(CRLF) - 1;
 
     escape = 0;
@@ -1064,8 +1063,12 @@ ngx_http_proxy_create_request(ngx_http_request_t *r)
     cl->buf = b;
 
 
+    // 重新组装http请求
+
+
     /* the request line */
 
+    // 请求行
     b->last = ngx_copy(b->last, method.data, method.len);
 
     u->uri.data = b->last;
@@ -3151,7 +3154,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
         *s = src[i];
     }
 
-    // 确保ngx_http_proxy_headers在headers_merged都存在
+    // 双重循环确保ngx_http_proxy_headers每个元素在headers_merged都存在
     while (h->key.len) {
 
         src = headers_merged.elts;
@@ -3161,7 +3164,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
                 goto next;
             }
         }
-
+        // h不存在于headers_merged中
         s = ngx_array_push(&headers_merged);
         if (s == NULL) {
             return NGX_ERROR;
@@ -3188,6 +3191,7 @@ ngx_http_proxy_merge_headers(ngx_conf_t *cf, ngx_http_proxy_loc_conf_t *conf,
     src = headers_merged.elts;
     for (i = 0; i < headers_merged.nelts; i++) {
 
+        // 把headers_merged的http头部名称放入headers_names
         hk = ngx_array_push(&headers_names);
         if (hk == NULL) {
             return NGX_ERROR;
