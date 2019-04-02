@@ -16,7 +16,7 @@
 #define NGX_IOVS  IOV_MAX
 #endif
 
-
+// 发送in链表，返回未发送完in链表剩余部分
 ngx_chain_t *
 ngx_writev_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 {

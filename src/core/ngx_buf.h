@@ -243,14 +243,14 @@ struct ngx_output_chain_ctx_s {
     ngx_bufs_t                   bufs;
     ngx_buf_tag_t                tag;
 
-    ngx_output_chain_filter_pt   output_filter;
+    ngx_output_chain_filter_pt   output_filter; // 输出函数，ngx_http_upstream_request_init中被设置为ngx_chain_writer
     void                        *filter_ctx; // 传递给output_filter的参数
 };
 
 
 typedef struct {
-    ngx_chain_t                 *out;
-    ngx_chain_t                **last;
+    ngx_chain_t                 *out; // 链表头
+    ngx_chain_t                **last; // 指向out链表最后一个元素的next地址，初始指向&out, *last = p; last = &p->next 实现尾插
     ngx_connection_t            *connection;
     ngx_pool_t                  *pool;
     off_t                        limit;

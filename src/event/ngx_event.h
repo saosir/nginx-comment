@@ -38,7 +38,7 @@ typedef struct {
 struct ngx_event_s {
     void            *data; // ngx_connection_t
 
-    unsigned         write:1; // 事件类型
+    unsigned         write:1; // 标识监听的事件是否是写事件
 
     unsigned         accept:1; // 监听socket，用于accept
 
@@ -64,7 +64,7 @@ struct ngx_event_s {
     unsigned         eof:1;
     unsigned         error:1;
 
-    unsigned         timedout:1; // 是否已经超时
+    unsigned         timedout:1; // 是否已经触发超时
     unsigned         timer_set:1; // 是否已加入红黑树计时器
 
     unsigned         delayed:1;

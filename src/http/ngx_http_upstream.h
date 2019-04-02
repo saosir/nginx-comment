@@ -123,9 +123,9 @@ struct ngx_http_upstream_srv_conf_s {
 typedef struct {
     ngx_http_upstream_srv_conf_t    *upstream;
 
-    ngx_msec_t                       connect_timeout;
-    ngx_msec_t                       send_timeout; // 两次socket写间隔超时值
-    ngx_msec_t                       read_timeout;
+    ngx_msec_t                       connect_timeout; // connect upstream的超时时间
+    ngx_msec_t                       send_timeout; // socket可写的超时参数，表示距离上一次写的超时时间，而不是整个请求的超时时间
+    ngx_msec_t                       read_timeout; // 同上
     ngx_msec_t                       timeout;
 
     size_t                           send_lowat;
@@ -259,6 +259,7 @@ typedef void (*ngx_http_upstream_handler_pt)(ngx_http_request_t *r,
 
 
 struct ngx_http_upstream_s {
+    // ngx_connection_t的socket有事件发生会回调
     ngx_http_upstream_handler_pt     read_event_handler;
     ngx_http_upstream_handler_pt     write_event_handler;
 
@@ -324,7 +325,7 @@ struct ngx_http_upstream_s {
     unsigned                         buffering:1;
     unsigned                         keepalive:1;
 
-    unsigned                         request_sent:1;
+    unsigned                         request_sent:1; // 是否已经开始向upstream发送数据
     unsigned                         header_sent:1;
 };
 

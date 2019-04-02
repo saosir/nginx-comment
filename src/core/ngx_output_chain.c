@@ -630,6 +630,7 @@ ngx_chain_writer(void *data, ngx_chain_t *in)
 
         cl->buf = in->buf;
         cl->next = NULL;
+        // 插入 ctx->out 链表尾部
         *ctx->last = cl;
         ctx->last = &cl->next;
     }
@@ -653,7 +654,7 @@ ngx_chain_writer(void *data, ngx_chain_t *in)
         return NGX_OK;
     }
 
-    ctx->out = c->send_chain(c, ctx->out, ctx->limit);
+    ctx->out = c->send_chain(c, ctx->out, ctx->limit); // 实际写socket，在ngx_event_connect_peer 设置为ngx_send_chain
 
     ngx_log_debug1(NGX_LOG_DEBUG_CORE, c->log, 0,
                    "chain writer out: %p", ctx->out);

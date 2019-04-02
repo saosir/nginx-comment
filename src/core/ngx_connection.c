@@ -798,6 +798,7 @@ ngx_get_connection(ngx_socket_t s, ngx_log_t *log)
         ngx_cycle->files[s] = c;
     }
 
+    // 将ngx_connection_t清空
     rev = c->read;
     wev = c->write;
 

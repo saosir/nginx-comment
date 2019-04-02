@@ -111,7 +111,7 @@ typedef enum {
 
 
 struct ngx_connection_s {
-    void               *data;
+    void               *data; // http模块会设置为 ngx_http_request_t
     ngx_event_t        *read;
     ngx_event_t        *write;
 
