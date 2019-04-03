@@ -1226,7 +1226,7 @@ ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
     u->request_sent = 0;
 
     if (rc == NGX_AGAIN) {
-        ngx_add_timer(c->write, u->conf->connect_timeout);
+        ngx_add_timer(c->write, u->conf->connect_timeout); // 设置连接upstream超时
         return;
     }
 

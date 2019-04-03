@@ -123,7 +123,7 @@ struct ngx_http_upstream_srv_conf_s {
 typedef struct {
     ngx_http_upstream_srv_conf_t    *upstream;
 
-    ngx_msec_t                       connect_timeout; // connect upstream的超时时间
+    ngx_msec_t                       connect_timeout; // 连接upstream的超时时间 proxy_connect_timeout或者fastcgi_connect_timeout等参数设置
     ngx_msec_t                       send_timeout; // socket可写的超时参数，表示距离上一次写的超时时间，而不是整个请求的超时时间
     ngx_msec_t                       read_timeout; // 同上
     ngx_msec_t                       timeout;
