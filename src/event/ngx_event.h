@@ -38,7 +38,7 @@ typedef struct {
 struct ngx_event_s {
     void            *data; // ngx_connection_t
 
-    unsigned         write:1;
+    unsigned         write:1; // 事件类型
 
     unsigned         accept:1; // 监听socket，用于accept
 

@@ -21,7 +21,7 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     ngx_socket_t       s;
     ngx_event_t       *rev, *wev;
     ngx_connection_t  *c;
-    // 会设置pc->sockaddr
+    // 设置pc->sockaddr
     rc = pc->get(pc, pc->data); // 获取upstream的peer地址
     if (rc != NGX_OK) {
         return rc;
@@ -123,7 +123,7 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, pc->log, 0,
                    "connect to %V, fd:%d #%d", pc->name, s, c->number);
-
+    // 真正开始连接socket
     rc = connect(s, pc->sockaddr, pc->socklen);
 
     if (rc == -1) {

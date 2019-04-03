@@ -916,7 +916,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
 
     in_addr = ngx_inet_addr(u->host.data, u->host.len);
 
-    if (in_addr == INADDR_NONE) {
+    if (in_addr == INADDR_NONE) { // u->host为域名非ip
         host = ngx_alloc(u->host.len + 1, pool->log);
         if (host == NULL) {
             return NGX_ERROR;
@@ -924,7 +924,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
 
         (void) ngx_cpystrn(host, u->host.data, u->host.len + 1);
 
-        h = gethostbyname((char *) host);
+        h = gethostbyname((char *) host); // dns查询
 
         ngx_free(host);
 

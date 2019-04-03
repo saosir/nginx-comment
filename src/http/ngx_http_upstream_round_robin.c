@@ -24,7 +24,8 @@ static void ngx_http_upstream_empty_save_session(ngx_peer_connection_t *pc,
 
 #endif
 
-// 默认的负责均衡算法
+// 默认的负责均衡算法，初始化每个upstream，构建upstream中的servers表
+// 在 ngx_http_upstream_init_main_conf 配置文件解析阶段调用
 ngx_int_t
 ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
     ngx_http_upstream_srv_conf_t *us)
@@ -174,6 +175,7 @@ ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
     u.host = us->host;
     u.port = (in_port_t) (us->port ? us->port : us->default_port);
 
+    // 使用指令proxy_pass 代理某个不存在的域名会打印下面错误
     if (ngx_inet_resolve_host(cf->pool, &u) != NGX_OK) {
         if (u.err) {
             ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
@@ -230,9 +232,8 @@ ngx_http_upstream_cmp_servers(const void *one, const void *two)
 }
 
 
-// 调用ngx_http_upstream_init_request函数初始化请求过程中
-// 调用uscf->peer.init(r, uscf)，uscf->peer.init指向gx_http_upstream_init_round_robin_peer
-// 在ngx_http_upstream_init_round_robin进行设置uscf->peer.init
+// ngx_http_upstream_init_request函数中调用uscf->peer.init
+// 每次收到client请求阶段调用，初始化upstream所有peer状态，get/free函数回调
 ngx_int_t
 ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
     ngx_http_upstream_srv_conf_t *us)

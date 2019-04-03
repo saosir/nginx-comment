@@ -418,7 +418,7 @@ ngx_http_upstream_create(ngx_http_request_t *r)
     return NGX_OK;
 }
 
-// proxy模块中，读取完http body后回调
+// proxy模块中，读取完http body后回调，创建发送给upstream的请求
 void
 ngx_http_upstream_init(ngx_http_request_t *r)
 {
@@ -641,7 +641,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
 
 found:
 
-    if (uscf->peer.init(r, uscf) != NGX_OK) { // init函数默认为ngx_http_upstream_init_round_robin_peer
+    if (uscf->peer.init(r, uscf) != NGX_OK) { // init函数默认为 ngx_http_upstream_init_round_robin_peer
         ngx_http_upstream_finalize_request(r, u,
                                            NGX_HTTP_INTERNAL_SERVER_ERROR);
         return;
@@ -933,6 +933,7 @@ ngx_http_upstream_handler(ngx_event_t *ev)
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "http upstream request: \"%V?%V\"", &r->uri, &r->args);
 
+    // 根据事件类型分派
     if (ev->write) {
         u->write_event_handler(r, u);
 
@@ -1407,6 +1408,7 @@ ngx_http_upstream_send_request(ngx_http_request_t *r, ngx_http_upstream_t *u)
         return;
     }
 
+    // 重置写超时计时器
     if (c->write->timer_set) {
         ngx_del_timer(c->write);
     }
@@ -1436,6 +1438,7 @@ ngx_http_upstream_send_request(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
         c->tcp_nopush = NGX_TCP_NOPUSH_UNSET;
     }
+    // 发送请求完毕，开始读响应，设置读请求超时
 
     ngx_add_timer(c->read, u->conf->read_timeout);
 
@@ -1517,6 +1520,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
     c->log->action = "reading response header from upstream";
 
+    // 读事件已经超时
     if (c->read->timedout) {
         ngx_http_upstream_next(r, u, NGX_HTTP_UPSTREAM_FT_TIMEOUT);
         return;

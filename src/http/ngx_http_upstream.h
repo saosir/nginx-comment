@@ -80,7 +80,7 @@ typedef ngx_int_t (*ngx_http_upstream_init_peer_pt)(ngx_http_request_t *r,
 typedef struct {
     ngx_http_upstream_init_pt        init_upstream; // 指向负载均衡策略初始化函数，least_conn和ip_hash指令设置
     ngx_http_upstream_init_peer_pt   init; // http请求到来之后在ngx_http_upstream_init_request中被调用
-    void                            *data;
+    void                            *data; // 如果负载均衡策略为round_robin,在 ngx_http_upstream_init_round_robin 中设置为upstream的servers列表
 } ngx_http_upstream_peer_t;
 
 
@@ -112,7 +112,7 @@ struct ngx_http_upstream_srv_conf_s {
     ngx_array_t                     *servers;  /* ngx_http_upstream_server_t */
 
     ngx_uint_t                       flags; // upstream支持的功能
-    ngx_str_t                        host;
+    ngx_str_t                        host; // proxy_pass http://www.google.com 会设置此字段
     u_char                          *file_name;
     ngx_uint_t                       line;
     in_port_t                        port;
@@ -124,7 +124,7 @@ typedef struct {
     ngx_http_upstream_srv_conf_t    *upstream;
 
     ngx_msec_t                       connect_timeout;
-    ngx_msec_t                       send_timeout;
+    ngx_msec_t                       send_timeout; // 两次socket写间隔超时值
     ngx_msec_t                       read_timeout;
     ngx_msec_t                       timeout;
 
@@ -266,7 +266,7 @@ struct ngx_http_upstream_s {
 
     ngx_event_pipe_t                *pipe;
 
-    ngx_chain_t                     *request_bufs; // 客户端发送的body
+    ngx_chain_t                     *request_bufs; // 发送到upstream的内容，包括headers和body
 
     ngx_output_chain_ctx_t           output;
     ngx_chain_writer_ctx_t           writer;
@@ -291,6 +291,7 @@ struct ngx_http_upstream_s {
 #if (NGX_HTTP_CACHE)
     ngx_int_t                      (*create_key)(ngx_http_request_t *r);
 #endif
+    // 组装创建发送给upstream的请求
     ngx_int_t                      (*create_request)(ngx_http_request_t *r);
     ngx_int_t                      (*reinit_request)(ngx_http_request_t *r);
     ngx_int_t                      (*process_header)(ngx_http_request_t *r);

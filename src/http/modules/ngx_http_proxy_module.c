@@ -1206,11 +1206,11 @@ ngx_http_proxy_create_request(ngx_http_request_t *r)
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "http proxy header:\n\"%*s\"",
                    (size_t) (b->last - b->pos), b->pos);
-
+    // 将body内存拷贝到 u->request_bufs，这里只是拷贝结构体，实际内容未做拷贝
     if (plcf->body_set == NULL && plcf->upstream.pass_request_body) {
 
         body = u->request_bufs;
-        u->request_bufs = cl;
+        u->request_bufs = cl; // cl为组装的http头
 
         while (body) {
             b = ngx_alloc_buf(r->pool);
