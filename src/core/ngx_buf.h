@@ -157,9 +157,9 @@ temp_file:	由于受到内存使用的限制，有时候一些buf的内容需要
 */
 struct ngx_buf_s {
 	// start <= pos <= last <= end
-    u_char          *pos; // 读取到的位置
-    u_char          *last; // 可用缓存的末尾
-    off_t            file_pos;
+    u_char          *pos; // 读取到的位置，如果在内存中 last - post 表示缓存大小
+    u_char          *last; // 可用缓存的末尾 
+    off_t            file_pos; // buf数据在文件中的偏移区间，如果在文件中 file_last - file_pos 表示缓存大小
     off_t            file_last;
 
     // 内存区间
@@ -221,7 +221,7 @@ struct ngx_output_chain_ctx_s {
     ngx_buf_t                   *buf;
     ngx_chain_t                 *in;
     ngx_chain_t                 *free;
-    ngx_chain_t                 *busy;
+    ngx_chain_t                 *busy; // 等待被写到socket的缓存
 
     unsigned                     sendfile:1;
     unsigned                     directio:1;
@@ -249,7 +249,7 @@ struct ngx_output_chain_ctx_s {
 
 
 typedef struct {
-    ngx_chain_t                 *out; // 链表头
+    ngx_chain_t                 *out; // 链表头，输出到socket的缓存链表
     ngx_chain_t                **last; // 指向out链表最后一个元素的next地址，初始指向&out, *last = p; last = &p->next 实现尾插
     ngx_connection_t            *connection;
     ngx_pool_t                  *pool;

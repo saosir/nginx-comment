@@ -196,14 +196,15 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
     if (*busy == NULL) {
         *busy = *out;
 
-    } else {// 改为else if (*out) 会不会好一点
-        for (cl = *busy; cl->next; cl = cl->next) { /* void */ }
+    } else { // else if (*out)
+        for (cl = *busy; cl->next; cl = cl->next) { /* void */ } // 移动到尾部
 
         cl->next = *out;
     }
 
     *out = NULL;
 
+    // 清理busy链表中buf为0的节点
     while (*busy) {
         cl = *busy;
 		// 找到一个buf内存大小非0直接跳出，说明后面的

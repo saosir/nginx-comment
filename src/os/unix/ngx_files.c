@@ -15,7 +15,7 @@ ngx_uint_t  ngx_file_aio = 1;
 
 #endif
 
-
+// 从 file 文件偏移 offset 地方读取 size 字节到 buf
 ssize_t
 ngx_read_file(ngx_file_t *file, u_char *buf, size_t size, off_t offset)
 {

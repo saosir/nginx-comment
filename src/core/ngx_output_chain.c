@@ -86,7 +86,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
             return NGX_AGAIN;
         }
 #endif
-
+        // 将 in 链表放入 out
         while (ctx->in) {
 
             /*
@@ -132,7 +132,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
                 continue;
             }
 
-            if (ctx->buf == NULL) {
+            if (ctx->buf == NULL) { // 想办法分配一个buf
 
                 rc = ngx_output_chain_align_file_buf(ctx, bsize);
 
@@ -145,7 +145,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
                     if (ctx->free) {
 
                         /* get the free buf */
-
+                        // 取出ngx_chain_s中的buf
                         cl = ctx->free;
                         ctx->buf = cl->buf;
                         ctx->free = cl->next;
@@ -186,7 +186,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
             if (cl == NULL) {
                 return NGX_ERROR;
             }
-
+            // 再将 ctx->buf 插入到 out 链表尾部
             cl->buf = ctx->buf;
             cl->next = NULL;
             *last_out = cl;
@@ -378,7 +378,7 @@ ngx_output_chain_align_file_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
     return NGX_OK;
 }
 
-
+// 分配 bsize 大小的 buf
 static ngx_int_t
 ngx_output_chain_get_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
 {
@@ -455,6 +455,7 @@ ngx_output_chain_get_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
 }
 
 
+// 拷贝或者从文件读取内容到ctx->buf
 static ngx_int_t
 ngx_output_chain_copy_buf(ngx_output_chain_ctx_t *ctx)
 {
@@ -466,6 +467,7 @@ ngx_output_chain_copy_buf(ngx_output_chain_ctx_t *ctx)
     src = ctx->in->buf;
     dst = ctx->buf;
 
+    // 保证 dst 有足够内存
     size = ngx_buf_size(src);
     size = ngx_min(size, dst->end - dst->pos);
 
@@ -597,7 +599,7 @@ ngx_output_chain_copy_buf(ngx_output_chain_ctx_t *ctx)
     return NGX_OK;
 }
 
-
+// 将in链表链接到 ctx->out ，然后再将 ctx->out 链表通过socket发送
 ngx_int_t
 ngx_chain_writer(void *data, ngx_chain_t *in)
 {
@@ -608,7 +610,7 @@ ngx_chain_writer(void *data, ngx_chain_t *in)
     ngx_connection_t  *c;
 
     c = ctx->connection;
-
+    // 将in链表插入到 ctx->out 尾部    
     for (size = 0; in; in = in->next) {
 
 #if 1

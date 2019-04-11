@@ -18,8 +18,8 @@ struct ngx_file_s {
     ngx_str_t                  name;
     ngx_file_info_t            info;
 
-    off_t                      offset;
-    off_t                      sys_offset;
+    off_t                      offset; // 读取了多少字节
+    off_t                      sys_offset; // fd的偏移，如果系统支持pread该参数可以忽略
 
     ngx_log_t                 *log;
 
