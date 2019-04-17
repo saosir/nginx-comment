@@ -75,6 +75,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
         }
     }
 
+    // 将in链表串联到out
     out = NULL;
     last_out = &out;
     last = NGX_NONE;
@@ -121,7 +122,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
             if (ngx_output_chain_as_is(ctx, ctx->in->buf)) {
 
                 /* move the chain link to the output chain */
-
+                // 将in放入out链表
                 cl = ctx->in;
                 ctx->in = cl->next;
 
@@ -132,7 +133,8 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
                 continue;
             }
 
-            if (ctx->buf == NULL) { // 想办法分配一个buf
+            // 想办法申请一块ctx->buf
+            if (ctx->buf == NULL) {
 
                 rc = ngx_output_chain_align_file_buf(ctx, bsize);
 
@@ -145,7 +147,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
                     if (ctx->free) {
 
                         /* get the free buf */
-                        // 取出ngx_chain_s中的buf
+                        // 从free链表取buf，并把外壳chain释放
                         cl = ctx->free;
                         ctx->buf = cl->buf;
                         ctx->free = cl->next;
@@ -161,7 +163,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
                     }
                 }
             }
-
+            // 从ctx->in或者直接从文件读取到ctx->buf
             rc = ngx_output_chain_copy_buf(ctx);
 
             if (rc == NGX_ERROR) {
@@ -260,6 +262,7 @@ ngx_output_chain_as_is(ngx_output_chain_ctx_t *ctx, ngx_buf_t *buf)
 }
 
 
+// 将in链表内存块复制到chain尾部
 static ngx_int_t
 ngx_output_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain,
     ngx_chain_t *in)
@@ -378,7 +381,7 @@ ngx_output_chain_align_file_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
     return NGX_OK;
 }
 
-// 分配 bsize 大小的 buf
+// 申请一块bsize大小的buf
 static ngx_int_t
 ngx_output_chain_get_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
 {
@@ -656,7 +659,7 @@ ngx_chain_writer(void *data, ngx_chain_t *in)
         return NGX_OK;
     }
 
-    ctx->out = c->send_chain(c, ctx->out, ctx->limit); // 实际写socket，在ngx_event_connect_peer 设置为ngx_send_chain
+    ctx->out = c->send_chain(c, ctx->out, ctx->limit); // 实际写socket，在ngx_event_connect_peer 设置为ngx_send_chain=ngx_io.send_chain
 
     ngx_log_debug1(NGX_LOG_DEBUG_CORE, c->log, 0,
                    "chain writer out: %p", ctx->out);

@@ -467,7 +467,7 @@ struct ngx_http_request_s {
     unsigned                          request_body_file_group_access:1;
     unsigned                          request_body_file_log_level:3;
 
-    unsigned                          subrequest_in_memory:1;
+    unsigned                          subrequest_in_memory:1; // 为1不转发响应
     unsigned                          waited:1;
 
 #if (NGX_HTTP_CACHE)

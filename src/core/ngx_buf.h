@@ -220,7 +220,7 @@ typedef void (*ngx_output_chain_aio_pt)(ngx_output_chain_ctx_t *ctx,
 struct ngx_output_chain_ctx_s {
     ngx_buf_t                   *buf;
     ngx_chain_t                 *in;
-    ngx_chain_t                 *free;
+    ngx_chain_t                 *free; // 空闲的buf链表
     ngx_chain_t                 *busy; // 等待被写到socket的缓存
 
     unsigned                     sendfile:1;

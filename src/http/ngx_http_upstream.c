@@ -1653,6 +1653,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
         return;
     }
 
+    // 直接发送响应给客户端
     if (!r->subrequest_in_memory) {
         ngx_http_upstream_send_response(r, u);
         return;
@@ -2055,7 +2056,7 @@ ngx_http_upstream_process_body_in_memory(ngx_http_request_t *r,
     }
 }
 
-
+// 向客户端发送响应
 static void
 ngx_http_upstream_send_response(ngx_http_request_t *r, ngx_http_upstream_t *u)
 {

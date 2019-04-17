@@ -129,7 +129,7 @@ typedef struct {
     ngx_msec_t                       timeout;
 
     size_t                           send_lowat;
-    size_t                           buffer_size;
+    size_t                           buffer_size; // proxy_buffer_size 接收upstream header的缓冲区大小
 
     size_t                           busy_buffers_size;
     size_t                           max_temp_file_size;

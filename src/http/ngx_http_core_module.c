@@ -1888,7 +1888,7 @@ ngx_http_send_response(ngx_http_request_t *r, ngx_uint_t status,
     return ngx_http_output_filter(r, &out);
 }
 
-
+// 返回响应头，调用 ngx_http_top_header_filter 链表
 ngx_int_t
 ngx_http_send_header(ngx_http_request_t *r)
 {
