@@ -157,14 +157,15 @@ temp_file:	由于受到内存使用的限制，有时候一些buf的内容需要
 */
 struct ngx_buf_s {
 	// start <= pos <= last <= end
-    u_char          *pos; // 读取到的位置，如果在内存中 last - post 表示缓存大小
-    u_char          *last; // 可用缓存的末尾 
-    off_t            file_pos; // buf数据在文件中的偏移区间，如果在文件中 file_last - file_pos 表示缓存大小
+	// pos 与 last 之间为有效缓存
+    u_char          *pos; // last - post 表示缓存大小
+    u_char          *last; // 往last位置写多少字节，就要将last向后偏移多少字节
+    off_t            file_pos; // buf数据在文件中的偏移区间，file_last - file_pos 表示缓存大小
     off_t            file_last;
 
     // 内存区间
     u_char          *start;         /* start of buffer */
-    u_char          *end;           /* end of buffer */
+    u_char          *end;           /* end of buffer  end - last 表示还有多少内存可以用 */
     ngx_buf_tag_t    tag;
     ngx_file_t      *file;
     ngx_buf_t       *shadow;

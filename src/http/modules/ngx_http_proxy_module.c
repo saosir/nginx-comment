@@ -80,7 +80,7 @@ typedef struct {
 
 
 typedef struct {
-    ngx_http_status_t              status;
+    ngx_http_status_t              status; // upstream返回的状态码s
     ngx_http_proxy_vars_t          vars;
     size_t                         internal_body_length;
 
@@ -1341,7 +1341,7 @@ ngx_http_proxy_process_status_line(ngx_http_request_t *r)
         u->headers_in.connection_close = 1;
     }
 
-    u->process_header = ngx_http_proxy_process_header;
+    u->process_header = ngx_http_proxy_process_header; // 切换到解析头部
 
     return ngx_http_proxy_process_header(r);
 }
@@ -1366,7 +1366,7 @@ ngx_http_proxy_process_header(ngx_http_request_t *r)
         if (rc == NGX_OK) {
 
             /* a header line has been parsed successfully */
-
+            // 解析到一个http头
             h = ngx_list_push(&r->upstream->headers_in.headers);
             if (h == NULL) {
                 return NGX_ERROR;
@@ -1398,6 +1398,7 @@ ngx_http_proxy_process_header(ngx_http_request_t *r)
                 ngx_strlow(h->lowcase_key, h->key.data, h->key.len);
             }
 
+            // 是否需要回调http头部用于设置变量
             hh = ngx_hash_find(&umcf->headers_in_hash, h->hash,
                                h->lowcase_key, h->key.len);
 

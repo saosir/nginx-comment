@@ -63,6 +63,7 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
 
     key = ngx_current_msec + timer;
 
+    // 先移除
     if (ev->timer_set) {
 
         /*

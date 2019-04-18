@@ -57,7 +57,7 @@ typedef struct {
     ngx_uint_t                       status;
     time_t                           response_sec;
     ngx_uint_t                       response_msec;
-    off_t                            response_length;
+    off_t                            response_length; // 读到upstreanm返回的字节数
 
     ngx_str_t                       *peer;
 } ngx_http_upstream_state_t;
@@ -155,8 +155,8 @@ typedef struct {
     ngx_path_t                      *temp_path;
 
     ngx_hash_t                       hide_headers_hash; // proxy_hide_header
-    ngx_array_t                     *hide_headers;
-    ngx_array_t                     *pass_headers; // proxy_pass_header 需要传递哪些从代理服务器返回的http头到client，优先级比hid_headers大
+    ngx_array_t                     *hide_headers; // proxy_hide_header 需要过滤哪些从upstream返回的http头
+    ngx_array_t                     *pass_headers; // proxy_pass_header 需要传递哪些从upstream返回的http头到client，优先级比hid_headers大
     ngx_addr_t                      *local; // proxy_bind
 
 #if (NGX_HTTP_CACHE)
@@ -274,19 +274,19 @@ struct ngx_http_upstream_s {
 
     ngx_http_upstream_conf_t        *conf;
 
-    ngx_http_upstream_headers_in_t   headers_in;
+    ngx_http_upstream_headers_in_t   headers_in; // upstream返回的http头部数组
 
     ngx_http_upstream_resolved_t    *resolved; // 已解析到的upstream地址
 
-    ngx_buf_t                        buffer;
-    off_t                            length;
+    ngx_buf_t                        buffer; // upstream返回的数据缓存
+    off_t                            length; // upstream返回http头部的Length
 
-    ngx_chain_t                     *out_bufs;
-    ngx_chain_t                     *busy_bufs;
-    ngx_chain_t                     *free_bufs;
+    ngx_chain_t                     *out_bufs; // 需要输出的buf，会先链接到busy_bufs尾部，由buffer得到
+    ngx_chain_t                     *busy_bufs; // 即将要写到socket的内存块
+    ngx_chain_t                     *free_bufs; // 空闲buf块链表
 
     ngx_int_t                      (*input_filter_init)(void *data);
-    ngx_int_t                      (*input_filter)(void *data, ssize_t bytes);
+    ngx_int_t                      (*input_filter)(void *data, ssize_t bytes);//u->buffer->last消费bytes字节，然后累加u->buffer->last
     void                            *input_filter_ctx; // 传递 给input_filter 的 data 参数
 
 #if (NGX_HTTP_CACHE)
@@ -295,7 +295,7 @@ struct ngx_http_upstream_s {
     // 组装创建发送给upstream的请求
     ngx_int_t                      (*create_request)(ngx_http_request_t *r);
     ngx_int_t                      (*reinit_request)(ngx_http_request_t *r);
-    ngx_int_t                      (*process_header)(ngx_http_request_t *r);
+    ngx_int_t                      (*process_header)(ngx_http_request_t *r); // 初始解析status line，然后解析header
     void                           (*abort_request)(ngx_http_request_t *r);
     void                           (*finalize_request)(ngx_http_request_t *r,
                                          ngx_int_t rc);

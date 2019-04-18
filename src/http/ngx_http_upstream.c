@@ -1567,10 +1567,10 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
     }
 
     for ( ;; ) {
-
+        // 读socket
         n = c->recv(c, u->buffer.last, u->buffer.end - u->buffer.last);
 
-        if (n == NGX_AGAIN) {
+        if (n == NGX_AGAIN) { // 下一次轮询继续读
 #if 0
             ngx_add_timer(rev, u->read_timeout);
 #endif
@@ -1586,7 +1586,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
         if (n == 0) {
             ngx_log_error(NGX_LOG_ERR, c->log, 0,
-                          "upstream prematurely closed connection");
+                          "upstream prematurely closed connection"); // 过早关闭4层连接
         }
 
         if (n == NGX_ERROR || n == 0) {
@@ -1594,7 +1594,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
             return;
         }
 
-        u->buffer.last += n;
+        u->buffer.last += n; // 读取到n字节，调整last指针
 
 #if 0
         u->valid_header_in = 0;
@@ -1606,7 +1606,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
 
         if (rc == NGX_AGAIN) {
 
-            if (u->buffer.last == u->buffer.end) {
+            if (u->buffer.last == u->buffer.end) { // upstream 返回http头部过大
                 ngx_log_error(NGX_LOG_ERR, c->log, 0,
                               "upstream sent too big header");
 
@@ -1649,6 +1649,7 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
         }
     }
 
+    
     if (ngx_http_upstream_process_headers(r, u) != NGX_OK) {
         return;
     }
@@ -1673,10 +1674,10 @@ ngx_http_upstream_process_header(ngx_http_request_t *r, ngx_http_upstream_t *u)
         return;
     }
 
-    n = u->buffer.last - u->buffer.pos;
-
+    n = u->buffer.last - u->buffer.pos; // body
+    // 读取header的时候连body也一起读进来了
     if (n) {
-        u->buffer.last -= n;
+        u->buffer.last -= n; // 回退n字节，预先处理掉这部分内存
 
         u->state->response_length += n;
 
@@ -1858,6 +1859,7 @@ ngx_http_upstream_test_connect(ngx_connection_t *c)
 }
 
 
+// 根据upstream返回的http头部进行处理，如隐藏过滤upstream返回的某些头部
 static ngx_int_t
 ngx_http_upstream_process_headers(ngx_http_request_t *r, ngx_http_upstream_t *u)
 {
@@ -2006,6 +2008,7 @@ ngx_http_upstream_process_body_in_memory(ngx_http_request_t *r,
 
     for ( ;; ) {
 
+        // 还有多少缓存可用
         size = b->end - b->last;
 
         if (size == 0) {
@@ -2015,7 +2018,7 @@ ngx_http_upstream_process_body_in_memory(ngx_http_request_t *r,
             return;
         }
 
-        n = c->recv(c, b->last, size);
+        n = c->recv(c, b->last, size); // 往last读取，这里不进行累加，有u->input_filter进行累加
 
         if (n == NGX_AGAIN) {
             break;
@@ -2037,7 +2040,7 @@ ngx_http_upstream_process_body_in_memory(ngx_http_request_t *r,
             break;
         }
     }
-
+    // 结束和upstream的连接，剩下的事情就是把结果返回给client
     if (u->length == 0) {
         ngx_http_upstream_finalize_request(r, u, 0);
         return;
@@ -2522,7 +2525,7 @@ ngx_http_upstream_non_buffered_filter_init(void *data)
     return NGX_OK;
 }
 
-
+// 把 u->buffer数据放到u->out_bufs
 static ngx_int_t
 ngx_http_upstream_non_buffered_filter(void *data, ssize_t bytes)
 {
@@ -2543,6 +2546,7 @@ ngx_http_upstream_non_buffered_filter(void *data, ssize_t bytes)
         return NGX_ERROR;
     }
 
+    // 放到out_bufs尾部
     *ll = cl;
 
     cl->buf->flush = 1;
@@ -2559,7 +2563,7 @@ ngx_http_upstream_non_buffered_filter(void *data, ssize_t bytes)
         return NGX_OK;
     }
 
-    u->length -= bytes;
+    u->length -= bytes; // 消耗了upstream返回的多少字节，当length为0表示结束
 
     return NGX_OK;
 }
